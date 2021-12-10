@@ -10,7 +10,7 @@ Finally, there is an option to reproduce the example from Figure 1 of our paper.
 
 After choosing a dataset, one of the algorithms can be chosen to run on the dataset. The algorithms are described in the paper.
 Some of the algorithms are only called on one timestep (Gx), which can be chosen in the top row.
-In case of a leaf order algorithm, the user can optionally choose the square the distances.
+In case of a leaf order algorithm, the user can optionally choose to square the distances.
 Note that all matrices will always have the same order.
 
 At the bottom of the page, after running an algorithm, a summary of statistics is displayed. 
