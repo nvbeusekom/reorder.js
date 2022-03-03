@@ -27,7 +27,7 @@
          "url": "http://www.aviz.fr/~fekete"
       }
    ],
-   "scripts": {
+   "scripts": {"start": "node rollup.config.dev.js rollup -c",
       "build": "rollup -c",
       "dev": "rollup -c rollup.config.dev.js -w",
       "pretest": "npm run build",
@@ -45,7 +45,8 @@
       "reorder.d.ts"
    ],
    "dependencies": {
-      "@sgratzl/science": "^2.0.0"
+      "@sgratzl/science": "^2.0.0",
+      "d3-shape": "^3.1.0"
    },
    "devDependencies": {
       "@rollup/plugin-commonjs": "^19.0.0",

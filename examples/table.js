@@ -191,6 +191,7 @@ class table{
             }
         }
         if(num === 0 && denom === 0){
+            console.log("Both 0 in MI computation");
             return[1,num];
         }
         return [((N/W) * (num/denom))/(N*N),num];
@@ -258,6 +259,44 @@ class table{
         var t = this.svg;
         t.selectAll(".row").select(".right")
                 .attr('fill', function(d, i) { return right_side_colors[row_perm1.indexOf(i)]; });
+       
+        // Horizontal link generator
+        var nodeData = [
+        {id: "D3",       x: 100, y: 25},
+        {id: "Scales",   x: 25, y: 175},
+        {id: "Shapes",   x: 175, y: 175}];
+
+        var linkData = [
+            {source: [100,25], target: [175,175]},   // D3 -> Shapes
+            {source: [100,25], target: [25,175]}]; // D3 -> Scales
+
+        //Begin making the horizontal link diagram
+        var link = d3.linkHorizontal()
+                .source(function(d) {
+                    return [d.source[1], d.source[0]];
+                })
+                .target(function(d) {
+                    return [d.target[1], d.target[0]];
+                });
+            
+            console.log(t.selectAll(".row")[0][0])
+            console.log(t //Adding the link paths
+            .selectAll(".row")
+            .data(linkData))
+            t //Adding the link paths
+            .selectAll(".row")
+            .data(linkData)
+            .attr("d", link);
+
+        t //Adding the text labels
+              .selectAll("text")
+              .data(nodeData)
+              .join("text")
+              .attr("font-size", "12px")
+              .attr("text-anchor", "middle")
+              .attr("x", d => d.y)
+              .attr("y", d => d.x + 20)
+              .text(d => d.id);
         
         
         var t2 = nexttable.svg;

@@ -12,8 +12,10 @@ line {
 }
     </style>
     <script src="/d3.v3.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-shape@3"></script>
     <script src="/reorder.js"></script>
     <script src="/table.js"></script>
+    <script src="link.js"></script>
     <script src="data_vis.js"></script>
     <script src="data_sch.js"></script>
     <script src="data_flt.js"></script>
@@ -22,6 +24,7 @@ line {
     <script src="data_videoteaser.js"></script>
     <script>
         var tables = [];
+        var link_transitions = [];
     </script>
   </head>
   <body>
@@ -39,29 +42,23 @@ line {
         <input type="number" id="timestep" name="timestep" min="1" max="100" value="1">
         <label id="loading"></label>
         <div style="margin-top:4px;margin-bottom: 4px">
-        <button type="button" onclick="print_all(tables,'quality')">Random Order</button>
+        <button type="button" onclick="random_permute(tables,'quality')">Random Order</button>
         <button type="button" onclick="initial_order_permute(tables,'quality')">Initial Order</button>
         <button type="button" onclick="max_mi_gx(tables,'quality')">Optimize Moran's I (NN-2OPT) on Graph Gx</button>
         
         </div>
         <div style="margin-top:4px;margin-bottom: 4px">
-        <button type="button" onclick="gx_l2_leaf_order_permute(tables,'quality',document.getElementById('square').checked)">Leaf Order Permute on Graph Gx (Euclidean distance)</button>
-        <button type="button" onclick="gx_morans_leaf_order_permute(tables,'quality',document.getElementById('square').checked)">Leaf Order Permute on Graph Gx (Morans distance)</button>
-        <button type="button" onclick="union_l2_leaf_order_permute(tables,'quality',document.getElementById('square').checked)">Union Leaf Order Permute (Euclidean distance)</button>
-        <button type="button" onclick="union_morans_leaf_order_permute(tables,'quality',document.getElementById('square').checked)">Union Leaf Order Permute (Moran's distance)</button>
-        </div><div>
-        <button type="button" onclick="simultaneous_l2_leaf_order_permute(tables,'quality',document.getElementById('square').checked)">Simultaneous Leaf Order Permute (Euclidean distance)</button>
-        <button type="button" onclick="simultaneous_morans_leaf_order_permute(tables,'quality',document.getElementById('square').checked)">Simultaneous Leaf Order Permute (Moran's distance)</button>
-        <label for="square">Square distances</label><input type="checkbox" id="square" name="square" value="square">
-        </div>
-        <div style="margin-top:4px;margin-bottom: 4px">
-        <button type="button" onclick="gx_barycenter_permute(tables,'quality')">Barycenter Permute on Graph Gx</button>
-        <button type="button" onclick="union_barycenter_permute(tables,'quality')">Union Barycenter Permute</button>
-        <button type="button" onclick="simultaneous_barycenter_permute(tables,'quality')">Simultaneous Barycenter Permute</button>
+        <button type="button" onclick="print_all(tables)">Print matrices</button>
+        <button type="button" onclick="printLinks(link_transitions)">Print links</button>
+        <button type="button" onclick="simultaneous_l2_leaf_order_permute(tables,'quality',false)">Simultaneous Leaf Order Permute (Euclidean distance)</button>
+        <button type="button" onclick="simultaneous_morans_leaf_order_permute(tables,'quality',false)">Simultaneous Leaf Order Permute (Moran's distance)</button>
         </div>
         <div style="margin-top:4px;margin-bottom: 4px">
         <button type="button" onclick="stable_split_LO(tables,'quality')">Stable Split</button>
         <button type="button" onclick="stepwise_improvement(tables,'quality')">Stepwise Improvement</button>
+        <button type="button" onclick="optimal_unstable(tables,'quality')">Unstable Optimal</button>
+        <button type="button" onclick="near_simultaneous_incrmental(tables,'quality')">Near Simultaneous</button>
+        <button type="button" onclick="greedy_incremental_genetic(tables,'quality')">Greedy Genetic</button>
         </div>
     </div>
     <div style='float:left;margin-right: 20px;overflow:auto;white-space:nowrap' id='heatmap'></div>
@@ -79,12 +76,12 @@ line {
 var matrices;
 var col_labels;
 var row_labels;
-
 var margin = {top: 30, right: 0, bottom: 10, left: 30},
     width = 500 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
 updateData();
+
 
 function updateData(){
     d3.select("#heatmap").selectAll("*").remove();
@@ -108,7 +105,6 @@ function updateData(){
        load_videoteaser((a, b, c, d) => {matrices = a; col_labels = b; row_labels = c; tables = d;});
     }
 }
-
 function computeQualities(t,str,time){
     var output = "";
     var bandwidth = [];
@@ -632,7 +628,13 @@ function simultaneous_barycenter_permute(t,str) {
 function print_all(tables){
     let output = "";
     for (var i = 0; i < tables.length; i++) {
-        if(i === 0 || i === 47 || i === 95){
+        if(false){
+            if(i === 0 || i === 47 || i === 95){
+                output += tables[i].print();
+                output += "\n";
+            }
+        }
+        else{
             output += tables[i].print();
             output += "\n";
         }
@@ -640,6 +642,7 @@ function print_all(tables){
     console.log(output);
 }
 
+// Not really stable
 function stable_split_LO(t, str){
     var halfway = Math.round(t.length/2);
     var t_copy = [].concat(t);
@@ -698,6 +701,382 @@ function stepwise_improvement(t,str){
     
 }
 
+function optimal_unstable(t,str){
+      var o1 = [];
+      var l = [];
+      for(let i = 0; i<t.length; i++){
+        var start = new Date().getTime();
+        var transpose = reorder.transpose(matrices[i]);
+        var dist_rows = reorder.dist()(matrices[i]),
+        dist_cols = reorder.dist()(transpose),
+        order = reorder.optimal_leaf_order(),
+        row_perm = order.distanceMatrix(dist_rows)(matrices[i]),
+        col_perm = order.distanceMatrix(dist_cols)(transpose);
+        t[i].order(row_perm, row_perm);
+        if(i > 0){
+            console.log("adding links");
+            l.push(minLinks(o1,row_perm));
+        }
+        o1 = row_perm;
+      }
+      link_transitions = l;
+      var end = new Date().getTime();
+      var time = end - start;
+
+      computeQualities(t,str,time);
+}
+
+function printLinks(l){
+        var res = "";
+        console.log("printing:");
+        console.log(l);
+        for (var i = 0; i < l.length; i++) {
+            res += i.toString();
+            res += '\n';
+            for (var j = 0; j < l[i].length; j++) {
+                res += l[i][j].print_link();
+                res += '\n';
+            }
+        }
+        console.log(res);
+        return res;
+}
+//minLinks([1,2,3,4],[3,1,2,4]);
+
+function minLinks(p1,p2){
+    if(p1.length !== p2.length){
+        return [];
+    }
+    var res = [];
+    for (var i = 0; i < p1.length; i++) {
+        var top_left = i;
+        var bot_left = i;
+        for (var j = 0; j < p2.length; j++) {
+            if(p1[i] === p2[j]){
+                var top_right = j;
+                var bot_right = j;
+                var inv = false;
+                if(i === p1.length-1){
+                    if(j !== p2.length-1){
+//                        console.log(new link(i,i,j,j,false).print_link());
+                        res.push(new link(i,i,j,j,false));
+                    }
+                    return res;
+                }
+                else if(j > 0 && p1[i+1] === p2[j-1]){
+                    // Inverse loop
+                    while(bot_left < p1.length && top_right > 0 && p1[bot_left+1] === p2[top_right-1]){
+                        bot_left += 1;
+                        top_right -= 1;
+                    }
+                    inv = true;
+                }
+                else if(j < p2.length-1 && p1[i+1] === p2[j+1]){
+                    // Normal loop
+                    while(bot_left < p1.length && bot_right < p2.length && p1[bot_left+1] === p2[bot_right+1]){
+                        bot_left += 1;
+                        bot_right += 1;
+                    }
+                }
+                if(inv || top_left !== top_right){
+//                    console.log(new link(top_left,bot_left,top_right,bot_right,inv).print_link());
+                    res.push(new link(top_left,bot_left,top_right,bot_right,inv));
+                }
+            }
+        }
+        i = bot_left;
+    
+    }
+    return res;
+}
+function greedy_incremental_genetic(t,str) {
+    var res = [];
+    
+    var identity = [];
+    for (var i = 0; i < t[0].n; i++) {
+        identity.push(i);
+    }
+    var id_reachable = get_reachable_orders(identity,1);
+    var dist_rows = reorder.dist()(matrices[0]);
+    var lo = reorder.optimal_leaf_order();
+    var last_orders = [lo.distanceMatrix(dist_rows)(matrices[0])];
+    for (var i = 1; i < 2; i++) {
+        var best_new_orders = [];
+        var best_order = 0;
+        var best_value = -2;
+        for (var j = 0; j < last_orders.length; j++) {
+            var new_orders = [];
+            var reachable = map_reachable(last_orders[j],id_reachable);
+            for (var k = 0; k < reachable.length; k++) {
+                new_orders = possibly_add(t[i],new_orders,reachable[k]);
+//                console.log(new_orders);
+            }
+            var val = t[i-1].computeMorans(last_orders[j])[0] + averageMI(t[i],new_orders);
+            console.log(t[i-1]);
+            console.log(last_orders[j]);
+            console.log(t[i-1].computeMorans(last_orders[j])[0]);
+            console.log(averageMI(t[i],new_orders));
+            console.log(val);
+            if(val > best_value){
+                best_new_orders = new_orders;
+                best_order = j;
+                best_value = val;
+            }
+        }
+        console.log(best_new_orders);
+        res.push(last_orders[best_order]);
+        last_orders = best_new_orders;
+    }
+    console.log(res);
+    return res;
+}
+
+function averageMI(ti, orders){
+    var sum = 0;
+    for (var i = 0; i < orders.length; i++) {
+        sum += ti.computeMorans(orders[i])[0];
+    }
+    return sum / orders.length;
+}
+
+function possibly_add(ti,new_orders,order){
+    if(new_orders.length < 10){
+        new_orders.push(order);
+        return new_orders;
+    }
+    var candidate = -1;
+    // Check how many are similar
+    for (var i = 0; i < new_orders; i++) {
+        if(difference(order,new_orders[i]) <= 2){
+            // Two are similar, it can never be added
+            if(candidate >= 0){
+                return new_orders;
+            }
+            candidate = i;
+        }
+    }
+    // One is similar
+    if(candidate >= 0){
+        if(ti.computeMorans(order)[0] > ti.computeMorans(new_orders[candidate])){
+            new_orders[candidate] = order;
+        }
+        return new_orders;
+    }
+    // None is similar, get the best one
+    candidate = 0;
+    for (var i = 1; i < new_orders.length; i++) {
+        if(ti.computeMorans(new_orders[i])[0] < ti.computeMorans(new_orders[candidate])[0]){
+            candidate = i;
+        }
+    }
+    new_orders[candidate] = order;
+    return new_orders;
+    
+    
+}
+
+function difference(o1,o2){
+    var count = 0;
+    for (var i = 0; i < o1.length; i++) {
+        if(o1[i] !== o2[i]){
+            count++;
+        }
+    }
+    return count;
+}
+
+function map_reachable(order,reachable){
+    var res = [];
+    for (var i = 0; i < reachable.length; i++) {
+        var reach = reachable[i];
+        var o = [];
+        for (var j = 0; j < order.length; j++) {
+            o.push(order[reach[j]]);
+        }
+        res.push(o);
+    }
+    return res;
+
+}
+
+function near_simultaneous_incremental(t,str){
+    var simul_order = simultaneous_l2_leaf_order_permute(t,str,false);
+    console.log(simul_order);
+    var reachable = get_reachable_orders(simul_order,1);
+    console.log(reachable);
+    var orders = [];
+    for (var i = 0; i < t.length; i++) {
+        var highest = -2;
+        var highest_index = 0;
+        for (var j = 0; j < reachable.length; j++) {
+            var simul_order = reachable[j];
+            var permuted = [];
+            for (var a = 0; a < t[i].row_perm.length; a++) {
+                permuted.push([]);
+                for (var b = 0; b < t[i].col_perm.length; b++) {
+                    permuted[a].push(t[i].matrix[simul_order[a]][simul_order[b]]);
+                }
+            }
+            var mi = t[i].computeMorans(permuted)[0];
+            console.log(mi);
+            if(mi > highest && (i === 0 || minLinks(orders[i-1],reachable[j]).length <= 2)){
+                highest = mi;
+                highest_index = j;
+            }
+        }
+        orders.push(reachable[highest_index]);
+        console.log(highest);
+    }
+    for(let i = 0; i<t.length; i++){
+        t[i].order(orders[i], reachable[i]);
+        if(i > 0){
+            link_transitions.push(minLinks(orders[i-1],orders[i]));
+        }
+    }
+    console.log(orders);
+    return computeQualities(t,str,-1);
+}  
+
+// Precompute and map indices!
+function get_reachable_orders(initial, nr_moves){
+    var orders = add_move(initial,[],nr_moves);
+    var no_dups = [];
+    for (var i = 0; i < orders.length; i++) {
+        var occurs_twice = false;
+        for (var j = i+1; j < orders.length; j++) {
+            if(same_array(orders[i],orders[j])){
+                occurs_twice = true;
+            }
+        }
+        if(!occurs_twice){
+            no_dups.push(orders[i]);
+        }
+    }
+    return no_dups;
+    
+}
+
+function same_array(o1,o2){
+    if(o1.length !== o2.length){
+        return false;
+    }
+    for(var i = 0 ; i < o1.length; i++){
+        if(o1[i] !== o2[i]){
+            return false;
+        }
+    }
+    return true;
+}
+
+function add_move(order,links, nr_moves){
+    var outcomes = [order];
+    if(nr_moves === 0){
+        return outcomes;
+    }
+    for (var i = 0; i < order.length; i++) {
+        for (var x = 0; x < links.length; x++) {
+            if(i >= links[x].topleft && i <= links[x].botleft){
+                i = links[x.botleft];
+                break;
+            }
+        }
+        for (var j = i; j < order.length; j++) {
+            for (var x = 0; x < links.length; x++) {
+                if(j === links[x].topleft){
+                    j = order.length;
+                    break;
+                }
+            }
+            // Add i,j as the left side of a link
+            // Same principle for right side (quadruple for loop with checking the links)
+            for (var k = 0; k < order.length; k++) {
+                for (var x = 0; x < links.length; x++) {
+                    if(k >= links[x].topright && k <= links[x].botright){
+                        k = links[x.botright];
+                        break;
+                    }
+                }
+                for (var l = k; l < order.length; l++) {
+                    for (var x = 0; x < links.length; x++) {
+                        if(l === links[x].topleft){
+                            l = order.length;
+                            break;
+                        }
+                    }
+                    if(l-k === j-i){
+                        // Add, ij -> kl and ij -> lk
+                        // Prevent identical outcome
+                        if(i !== k){
+                            var newlinks = [...links];
+                            var link1 = new link(i,j,k,l,false);
+                            newlinks.push(link1);
+                            // Do swap for passing
+                            var neworder1 = doLink(order,link1);
+//                            console.log("Swap " + i + j + k + l);
+//                            console.log(neworder1);
+                            outcomes = outcomes.concat(add_move(neworder1,newlinks,nr_moves-1));
+                        }
+                        else if(!all_equal(i,j,k,l)){
+                            var newlinksInv = [...links];
+                            var link2 = new link(i,j,k,l,true);
+                            newlinksInv.push(link2);
+                            var neworder2 = doLink(order,link2);
+//                            console.log("SwapInv " + i + j + k + l);
+//                            console.log(neworder2);
+                            outcomes = outcomes.concat(add_move(neworder2,newlinksInv,nr_moves-1));
+                        }
+                    }
+                    
+                }
+            }
+            // Print the ouput, save it for precomputing purposes...
+        }
+    }
+    return outcomes;
+}
+
+function doLink(order,l){
+    var neworder = [...order];
+    // Move the Link part
+    var b;
+    if(l.inversed){
+        b = l.botright;
+    }
+    else{
+        b = l.topright;
+    }
+    for(var a = l.topleft; a <= l.botleft; a++){
+        neworder[b] = order[a];
+        if(l.inversed){
+            b--;
+        }
+        else{
+            b++;
+        }
+    }
+    // Move the rest
+    // Link is going down
+    if(l.topleft < l.topright){
+        var b = l.topleft;
+        for(var a = l.botleft+1; a <= l.botright; a++){
+            neworder[b] = order[a];
+            b++;
+        }
+    }
+    // Link is going up
+    else{
+        var b = l.botright+1;
+        for(var a = l.topright; a < l.topleft; a++){
+            neworder[b] = order[a];
+            b++;
+        }
+    }
+    return neworder;
+}
+
+function all_equal(a,b,c,d){
+    return a === b && a === c && a === d && b === c && b === d && c === d;
+}
       
     </script>
 </html>
