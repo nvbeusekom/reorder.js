@@ -39,6 +39,7 @@ line {
         <input type="number" id="timestep" name="timestep" min="1" max="100" value="1">
         <label id="loading"></label>
         <div style="margin-top:4px;margin-bottom: 4px">
+        <button type="button" onclick="print_all(tables)">Print Matrices</button>
         <button type="button" onclick="random_permute(tables,'quality')">Random Order</button>
         <button type="button" onclick="initial_order_permute(tables,'quality')">Initial Order</button>
         <button type="button" onclick="max_mi_gx(tables,'quality')">Optimize Moran's I (NN-2OPT) on Graph Gx</button>
@@ -220,7 +221,7 @@ function max_mi_gx(t,str) {
                 t[i].order(res, res);
               }
             oldm = newm;
-            newm = t[0].quality()[3];
+            newm = t[timestep].quality()[3];
             if(newm > best_morans){
                 best_morans = newm;
                 best_order = res;
@@ -237,84 +238,88 @@ function max_mi_gx(t,str) {
 
 function max_mi_individual(t,str) {
     var start = new Date().getTime();
+    var orders = [];
     for (var timestep = 0; timestep < t.length; timestep++) {
-    
-    var rows = reorder.permutation(matrices[timestep].length);
+        console.log("Doing " + timestep);
+        var rows = reorder.permutation(matrices[timestep].length);
 
-    var n = 0;
-    var m = 0;
-    for (var i = 0; i < matrices[timestep].length; i++) {
-        for (var j = 0; j < matrices[timestep][0].length; j++) {
-            n++;
-            if(matrices[timestep][i][j] === 1){
-                m++;
-            }
-        }
-    }
-    var best_morans = -1;
-    var best_order = [];
-    for (var i = 0; i < rows.length; i++) {
-        var initial = rows[0];
-        var res = [];
-        res.push(initial);
-        while(res.length < rows.length){
-          var nearest = -1;
-          for (var i = 1; i < rows.length; i++) {
-              if(!res.includes(rows[i])){
-                  var last = matrices[timestep][res[res.length-1]];
-                  var r1 = matrices[timestep][rows[i]];
-                  var r2 = matrices[timestep][nearest];
-                  if(nearest === -1){
-                      nearest = rows[i];
-                  }
-                  else if(weighted_value_rows(last,r1,n,m) > weighted_value_rows(last,r2,n,m)){
-                      nearest = rows[i];
-                  }
-                  else{
-                  }
-              }
-          }
-          res.push(nearest);
-        }
-        for(let i = 0; i<tables.length; i++){
-          t[i].order(res, res);
-        }
-        best_order = res;
-        var oldm = 0;
-        var newm = t[0].quality()[3];
-        while(newm-oldm > 0.0001){
-            for (var i = 0; i < res.length; i++) {
-                for (var j = i+2; j < res.length-1; j++) {
-                    // i and i+1 and j and j+1
-                    var check = [];
-                    for (var n = 0; n < res.length; n++) {
-                        check[n] = res[n];
-                    }
-                    check[i+1] = res[j];
-                    check[j] = res[i+1];
-                    for (var x = 0; x < (j-(i+1)); x++) {
-                         check[i+1+x] = res[j-x];
-                    }
-                    var oldq = weighted_value_rows(matrices[timestep][res[i]],matrices[timestep][res[i+1]],n,m) + weighted_value_rows(matrices[timestep][res[j]],matrices[timestep][res[j+1]],n,m);
-                    var newq = weighted_value_rows(matrices[timestep][check[i]],matrices[timestep][check[i+1]],n,m) + weighted_value_rows(matrices[timestep][check[j]],matrices[timestep][check[j+1]],n,m);
-                    if(newq > oldq){
-                        res = check;
-                    }
+        var n = 0;
+        var m = 0;
+        for (var i = 0; i < matrices[timestep].length; i++) {
+            for (var j = 0; j < matrices[timestep][0].length; j++) {
+                n++;
+                if(matrices[timestep][i][j] === 1){
+                    m++;
                 }
             }
-            for(let i = 0; i<t.length; i++){
-                t[i].order(res, res);
+        }
+        var best_morans = -1;
+        var best_order = [];
+        for (var i = 0; i < rows.length; i++) {
+            var initial = rows[0];
+            var res = [];
+            res.push(initial);
+            while(res.length < rows.length){
+              var nearest = -1;
+              for (var i = 1; i < rows.length; i++) {
+                  if(!res.includes(rows[i])){
+                      var last = matrices[timestep][res[res.length-1]];
+                      var r1 = matrices[timestep][rows[i]];
+                      var r2 = matrices[timestep][nearest];
+                      if(nearest === -1){
+                          nearest = rows[i];
+                      }
+                      else if(weighted_value_rows(last,r1,n,m) > weighted_value_rows(last,r2,n,m)){
+                          nearest = rows[i];
+                      }
+                      else{
+                      }
+                  }
               }
-            oldm = newm;
-            newm = t[0].quality()[3];
-            if(newm > best_morans){
-                best_morans = newm;
-                best_order = res;
+              res.push(nearest);
+            }
+            for(let i = 0; i<tables.length; i++){
+              t[i].order(res, res);
+            }
+            best_order = res;
+            var oldm = 0;
+            var newm = t[0].quality()[3];
+            while(newm-oldm > 0.0001){
+                for (var i = 0; i < res.length; i++) {
+                    for (var j = i+2; j < res.length-1; j++) {
+                        // i and i+1 and j and j+1
+                        var check = [];
+                        for (var n = 0; n < res.length; n++) {
+                            check[n] = res[n];
+                        }
+                        check[i+1] = res[j];
+                        check[j] = res[i+1];
+                        for (var x = 0; x < (j-(i+1)); x++) {
+                             check[i+1+x] = res[j-x];
+                        }
+                        var oldq = weighted_value_rows(matrices[timestep][res[i]],matrices[timestep][res[i+1]],n,m) + weighted_value_rows(matrices[timestep][res[j]],matrices[timestep][res[j+1]],n,m);
+                        var newq = weighted_value_rows(matrices[timestep][check[i]],matrices[timestep][check[i+1]],n,m) + weighted_value_rows(matrices[timestep][check[j]],matrices[timestep][check[j+1]],n,m);
+                        if(newq > oldq){
+                            res = check;
+                        }
+                    }
+                }
+                for(let i = 0; i<t.length; i++){
+                    t[i].order(res, res);
+                  }
+                oldm = newm;
+                newm = t[0].quality()[3];
+                if(newm > best_morans){
+                    best_morans = newm;
+                    best_order = res;
+                }
             }
         }
+        orders.push(best_order);
     }
-    
-    t[timestep].order(best_order, best_order);
+    for (var i = 0; i < t.length; i++) {
+        console.log(orders[i])
+        t[i].order(orders[i],orders[i]);
     }
     var end = new Date().getTime();
     var time = end - start;
@@ -708,6 +713,22 @@ function simultaneous_barycenter_permute(t,str) {
     return computeQualities(t,str,time);
 }
 
+function print_all(tables){
+    let output = "";
+    for (var i = 0; i < tables.length; i++) {
+        if(false){
+            if(i === 0 || i === 47 || i === 95){
+                output += tables[i].print();
+                output += "\n";
+            }
+        }
+        else{
+            output += tables[i].print();
+            output += "\n";
+        }
+    }
+    console.log(output);
+}
 
       
     </script>
