@@ -272,18 +272,9 @@ function max_mi_individual(t,str) {
               }
               res.push(nearest);
             }
-<<<<<<< HEAD
             best_order = res;
             var oldm = 0;
             var newm = get_MI(t[timestep],res);
-=======
-            for(let i = 0; i<tables.length; i++){
-              t[i].order(res, res);
-            }
-            best_order = res;
-            var oldm = 0;
-            var newm = t[0].quality()[3];
->>>>>>> 4e9b6d6c4cd41c026fed7518e6aff88ec9bb8e32
             while(newm-oldm > 0.0001){
                 for (var i = 0; i < res.length; i++) {
                     for (var j = i+2; j < res.length-1; j++) {
@@ -304,16 +295,8 @@ function max_mi_individual(t,str) {
                         }
                     }
                 }
-<<<<<<< HEAD
                 oldm = newm;
                 newm = get_MI(t[timestep],res);
-=======
-                for(let i = 0; i<t.length; i++){
-                    t[i].order(res, res);
-                  }
-                oldm = newm;
-                newm = t[0].quality()[3];
->>>>>>> 4e9b6d6c4cd41c026fed7518e6aff88ec9bb8e32
                 if(newm > best_morans){
                     best_morans = newm;
                     best_order = res;
