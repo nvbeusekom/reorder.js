@@ -811,12 +811,7 @@ function greedy_incremental_genetic(t,str) {
                 new_orders = possibly_add(t[i],new_orders,reachable[k]);
 //                console.log(new_orders);
             }
-            var val = t[i-1].computeMorans(last_orders[j])[0] + averageMI(t[i],new_orders);
-            console.log(t[i-1]);
-            console.log(last_orders[j]);
-            console.log(t[i-1].computeMorans(last_orders[j])[0]);
-            console.log(averageMI(t[i],new_orders));
-            console.log(val);
+            var val = get_MI(t[i-1],last_orders[j]) + averageMI(t[i],new_orders);
             if(val > best_value){
                 best_new_orders = new_orders;
                 best_order = j;
@@ -834,7 +829,7 @@ function greedy_incremental_genetic(t,str) {
 function averageMI(ti, orders){
     var sum = 0;
     for (var i = 0; i < orders.length; i++) {
-        sum += ti.computeMorans(orders[i])[0];
+        sum += get_MI(ti,orders[i]);
     }
     return sum / orders.length;
 }
@@ -857,7 +852,7 @@ function possibly_add(ti,new_orders,order){
     }
     // One is similar
     if(candidate >= 0){
-        if(ti.computeMorans(order)[0] > ti.computeMorans(new_orders[candidate])){
+        if(get_MI(ti,order) > get_MI(ti,new_orders[candidate])){
             new_orders[candidate] = order;
         }
         return new_orders;
@@ -865,7 +860,7 @@ function possibly_add(ti,new_orders,order){
     // None is similar, get the best one
     candidate = 0;
     for (var i = 1; i < new_orders.length; i++) {
-        if(ti.computeMorans(new_orders[i])[0] < ti.computeMorans(new_orders[candidate])[0]){
+        if(get_MI(ti,new_orders[i]) < get_MI(ti,new_orders[candidate])){
             candidate = i;
         }
     }
@@ -910,14 +905,7 @@ function near_simultaneous_incremental(t,str){
         var highest_index = 0;
         for (var j = 0; j < reachable.length; j++) {
             var simul_order = reachable[j];
-            var permuted = [];
-            for (var a = 0; a < t[i].row_perm.length; a++) {
-                permuted.push([]);
-                for (var b = 0; b < t[i].col_perm.length; b++) {
-                    permuted[a].push(t[i].matrix[simul_order[a]][simul_order[b]]);
-                }
-            }
-            var mi = t[i].computeMorans(permuted)[0];
+            var mi = get_MI(t[i],simul_order);
             console.log(mi);
             if(mi > highest && (i === 0 || minLinks(orders[i-1],reachable[j]).length <= 2)){
                 highest = mi;
@@ -1076,6 +1064,18 @@ function doLink(order,l){
 
 function all_equal(a,b,c,d){
     return a === b && a === c && a === d && b === c && b === d && c === d;
+}
+
+function get_MI(t,order){
+    var permuted = [];
+    for (var a = 0; a < t[i].row_perm.length; a++) {
+        permuted.push([]);
+        for (var b = 0; b < t[i].col_perm.length; b++) {
+            permuted[a].push(t[i].matrix[order[a]][order[b]]);
+        }
+    }
+    var mi = t[i].computeMorans(permuted)[0];
+    return mi;
 }
       
     </script>
