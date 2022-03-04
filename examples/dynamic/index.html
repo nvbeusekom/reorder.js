@@ -615,15 +615,15 @@ function simultaneous_barycenter_permute(t,str) {
     return computeQualities(t,str,time);
 }
 
-function get_MI(t,order){
+function get_MI(ti,order){
     var permuted = [];
-    for (var a = 0; a < t[i].row_perm.length; a++) {
+    for (var a = 0; a < ti.row_perm.length; a++) {
         permuted.push([]);
-        for (var b = 0; b < t[i].col_perm.length; b++) {
-            permuted[a].push(t[i].matrix[order[a]][order[b]]);
+        for (var b = 0; b < ti.col_perm.length; b++) {
+            permuted[a].push(ti.matrix[order[a]][order[b]]);
         }
     }
-    var mi = t[i].computeMorans(permuted)[0];
+    var mi = ti.computeMorans(permuted)[0];
     return mi;
 }
       
