@@ -189,12 +189,9 @@ function max_mi_gx(t,str) {
           }
           res.push(nearest);
         }
-        for(let i = 0; i<tables.length; i++){
-          t[i].order(res, res);
-        }
         best_order = res;
         var oldm = 0;
-        var newm = t[0].quality()[3];
+        var newm = get_MI(t[timestep],res);
         while(newm-oldm > 0.0001){
             for (var i = 0; i < res.length; i++) {
                 for (var j = i+2; j < res.length-1; j++) {
@@ -215,11 +212,8 @@ function max_mi_gx(t,str) {
                     }
                 }
             }
-            for(let i = 0; i<t.length; i++){
-                t[i].order(res, res);
-              }
             oldm = newm;
-            newm = t[0].quality()[3];
+            newm = get_MI(t[timestep],res);
             if(newm > best_morans){
                 best_morans = newm;
                 best_order = res;
@@ -621,7 +615,17 @@ function simultaneous_barycenter_permute(t,str) {
     return computeQualities(t,str,time);
 }
 
-
+function get_MI(t,order){
+    var permuted = [];
+    for (var a = 0; a < t[i].row_perm.length; a++) {
+        permuted.push([]);
+        for (var b = 0; b < t[i].col_perm.length; b++) {
+            permuted[a].push(t[i].matrix[order[a]][order[b]]);
+        }
+    }
+    var mi = t[i].computeMorans(permuted)[0];
+    return mi;
+}
       
     </script>
 </html>
