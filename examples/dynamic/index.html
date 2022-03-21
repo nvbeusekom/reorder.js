@@ -21,6 +21,7 @@ line {
     <script src="data_flt.js"></script>
     <script src="data_survey.js"></script>
     <script src="data_example.js"></script>
+    <script src="data_example_1.js"></script>
     <script src="data_videoteaser.js"></script>
     <script>
         var tables = [];
@@ -36,6 +37,7 @@ line {
           <option value="vis">VIS</option>
           <option value="survey">Behrisch etal survey (2016) matrices</option>
           <option value="example">Our constructed example</option>
+          <option value="example_1">Example 2</option>
           <option value="videoteaser">Teaser from video</option>
         </select>
         <label for="timestep">Choose x (timestep):</label>
@@ -44,7 +46,7 @@ line {
         <div style="margin-top:4px;margin-bottom: 4px">
         <button type="button" onclick="random_permute(tables,'quality')">Random Order</button>
         <button type="button" onclick="initial_order_permute(tables,'quality')">Initial Order</button>
-        <button type="button" onclick="max_mi_gx(tables,'quality')">Optimize Moran's I (NN-2OPT) on Graph Gx</button>
+        <button type="button" onclick="max_mi_gx(tables,'quality',-1)">Optimize Moran's I (NN-2OPT) on Graph Gx</button>
         
         </div>
         <div style="margin-top:4px;margin-bottom: 4px">
@@ -54,11 +56,13 @@ line {
         <button type="button" onclick="simultaneous_morans_leaf_order_permute(tables,'quality',false)">Simultaneous Leaf Order Permute (Moran's distance)</button>
         </div>
         <div style="margin-top:4px;margin-bottom: 4px">
-        <button type="button" onclick="stable_split_LO(tables,'quality')">Stable Split</button>
-        <button type="button" onclick="stepwise_improvement(tables,'quality')">Stepwise Improvement</button>
+        <button type="button" onclick="interpolate_linearly(tables,'quality')">Interpolate Linearly</button>
+        <button type="button" onclick="interpolate_twoway(tables,'quality')">Interpolate Two-way</button>
         <button type="button" onclick="optimal_unstable(tables,'quality')">Unstable Optimal</button>
-        <button type="button" onclick="near_simultaneous_incrmental(tables,'quality')">Near Simultaneous</button>
-        <button type="button" onclick="greedy_incremental_genetic(tables,'quality')">Greedy Genetic</button>
+        <button type="button" onclick="near_simultaneous_incremental(tables,'quality')">Near Simultaneous Greedy</button>
+        <button type="button" onclick="near_simultaneous_dag(tables,'quality')">Near Simultaneous DAG</button>
+        <button type="button" onclick="greedy_lookahead(tables,'quality')">Greedy Look-Ahead</button>
+        <button type="button" onclick="greedy_topk(tables,'quality')">Greedy Diversity</button>
         </div>
     </div>
     <div style='float:left;margin-right: 20px;overflow:auto;white-space:nowrap' id='heatmap'></div>
@@ -80,6 +84,9 @@ var margin = {top: 30, right: 0, bottom: 10, left: 30},
     width = 500 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
+var precomputedMI = [];
+
+
 updateData();
 
 
@@ -87,22 +94,25 @@ function updateData(){
     d3.select("#heatmap").selectAll("*").remove();
     var dataset = document.getElementById('dataset').value;
     if(dataset === "flt"){
-        load_flt((a, b, c, d) => {matrices = a; col_labels = b; row_labels = c; tables = d;});
+        load_flt((a, b, c, d) => {matrices = a; col_labels = b; row_labels = c; tables = d; precompute();});
     }
     if(dataset === "sch"){
-        load_sch((a, b, c, d) => {matrices = a; col_labels = b; row_labels = c; tables = d;});
+        load_sch((a, b, c, d) => {matrices = a; col_labels = b; row_labels = c; tables = d; precompute();});
     }
     if(dataset === "vis"){
-        load_vis((a, b, c, d) => {matrices = a; col_labels = b; row_labels = c; tables = d;});
+        load_vis((a, b, c, d) => {matrices = a; col_labels = b; row_labels = c; tables = d; precompute();});
     }
     if(dataset === "survey"){
-        load_survey((a, b, c, d) => {matrices = a; col_labels = b; row_labels = c; tables = d;});
+        load_survey((a, b, c, d) => {matrices = a; col_labels = b; row_labels = c; tables = d; precompute();});
     }
     if(dataset === "example"){ 
-       load_example((a, b, c, d) => {matrices = a; col_labels = b; row_labels = c; tables = d;});
+       load_example((a, b, c, d) => {matrices = a; col_labels = b; row_labels = c; tables = d; precompute();});
+    }
+    if(dataset === "example_1"){ 
+       load_example_1((a, b, c, d) => {matrices = a; col_labels = b; row_labels = c; tables = d; precompute();});
     }
     if(dataset === "videoteaser"){ 
-       load_videoteaser((a, b, c, d) => {matrices = a; col_labels = b; row_labels = c; tables = d;});
+       load_videoteaser((a, b, c, d) => {matrices = a; col_labels = b; row_labels = c; tables = d; precompute();});
     }
 }
 function computeQualities(t,str,time){
@@ -142,15 +152,17 @@ function random_permute(t,str) {
       computeQualities(t,str);
 }
 
-function max_mi_gx(t,str) {
-    var timestep = document.getElementById("timestep").value - 1;
-      if(timestep < 0 || timestep >= matrices.length){
-        document.getElementById("loading").innerHTML = "Timestep (x) is not valid for this dataset";  
-        return;
-      }
-      else{
-        document.getElementById("loading").innerHTML = ""; 
-      }
+function max_mi_gx(t,str, timestep) {
+    if(timestep === -1){
+        timestep = document.getElementById("timestep").value - 1;
+        if(timestep < 0 || timestep >= matrices.length){
+          document.getElementById("loading").innerHTML = "Timestep (x) is not valid for this dataset";  
+          return;
+        }
+        else{
+          document.getElementById("loading").innerHTML = ""; 
+        }
+    }
     var start = new Date().getTime();
     
     var rows = reorder.permutation(matrices[timestep].length);
@@ -233,6 +245,7 @@ function max_mi_gx(t,str) {
         t[i].order(best_order, best_order);
       }
     computeQualities(t,str,time);
+    return best_order;
 }
 
 function weighted_value_rows(r1,r2,cells,m){
@@ -714,7 +727,6 @@ function optimal_unstable(t,str){
         col_perm = order.distanceMatrix(dist_cols)(transpose);
         t[i].order(row_perm, row_perm);
         if(i > 0){
-            console.log("adding links");
             l.push(minLinks(o1,row_perm));
         }
         o1 = row_perm;
@@ -789,83 +801,288 @@ function minLinks(p1,p2){
     }
     return res;
 }
-function greedy_incremental_genetic(t,str) {
+
+function greedy_topk(t,str) {
     var res = [];
-    
     var identity = [];
     for (var i = 0; i < t[0].n; i++) {
         identity.push(i);
     }
     var id_reachable = get_reachable_orders(identity,1);
-    var dist_rows = reorder.dist()(matrices[0]);
-    var lo = reorder.optimal_leaf_order();
-    var last_orders = [lo.distanceMatrix(dist_rows)(matrices[0])];
-    for (var i = 1; i < 2; i++) {
+    var firstorder = max_mi_gx(t,str,0);
+    var paths = [[firstorder]];
+    var MIs = [pathEval(paths[0])];
+    for (var i = 1; i < t.length; i++) {
+        console.log("Doing  t" + i);
+        var new_paths = [];
+        var new_MIs = [];
+        for (var j = 0; j < paths.length; j++) {
+            console.log("Order " + j + " of timestep " + i);
+            // For each path look at the last order
+            var order = clone(paths[j][paths[j].length-1]);
+            var reachable = map_reachable(order,id_reachable);
+            var candidate = clone(paths[j]);
+            candidate.push(reachable[0]);
+            console.log(candidate);
+            console.log("Before")
+            console.log(new_paths);
+            for (var k = 0; k < reachable.length; k++) {
+                // Make sure that the location of the added order is returned as well
+                candidate[candidate.length-1] = reachable[k];
+                var MI = MIs[j] + evalOrder(i,reachable[k]);
+                // This cloning is slow, can it happen as ref by value? ========================================================= TODO ===========================
+                var sol = possibly_add_path(new_paths,clone(candidate), new_MIs, MI);
+                new_paths = sol[0];
+                new_MIs = sol[1];
+            }
+            console.log("After");
+            console.log(new_paths);
+        }
+        paths = clone(new_paths);
+        MIs = clone(new_MIs);
+        console.log(paths);
+        console.log(MIs);
+//        return;
+    }
+    console.log(paths);
+    console.log(MIs);
+    var best = 0;
+    for (var i = 0; i < MIs.length; i++) {
+        if(MIs[i] > MIs[best]){
+            best = i;
+        }
+    }
+    var res = paths[best];
+    for (var i = 0; i < t.length; i++) {
+        t[i].order(res[i], res[i]);
+        if(i > 0){
+            link_transitions.push(minLinks(res[i-1],res[i]));
+        }
+    }
+    return computeQualities(t,str,-1);
+}
+
+function greedy_lookahead(t,str) {
+    var res = [];
+    var identity = [];
+    for (var i = 0; i < t[0].n; i++) {
+        identity.push(i);
+    }
+    var id_reachable = get_reachable_orders(identity,1);
+    var last_orders = [max_mi_gx(t,str,0)];
+    for (var i = 1; i < t.length; i++) {
+        console.log("Doing " + i);
         var best_new_orders = [];
         var best_order = 0;
-        var best_value = -2;
+        var best_value = Number.NEGATIVE_INFINITY;
         for (var j = 0; j < last_orders.length; j++) {
+            console.log("Order " + j + " of timestep " + i);
             var new_orders = [];
             var reachable = map_reachable(last_orders[j],id_reachable);
             for (var k = 0; k < reachable.length; k++) {
-                new_orders = possibly_add(t[i],new_orders,reachable[k]);
+                new_orders = possibly_add(i,new_orders,reachable[k]);
 //                console.log(new_orders);
             }
-            var val = get_MI(t[i-1],last_orders[j]) + averageMI(t[i],new_orders);
+            var val = evalOrder(i-1,last_orders[j]) + averageEval(i,new_orders);;
             if(val > best_value){
                 best_new_orders = new_orders;
                 best_order = j;
                 best_value = val;
             }
         }
-        console.log(best_new_orders);
         res.push(last_orders[best_order]);
         last_orders = best_new_orders;
+        if(i === t.length - 1){
+            var best_val = -2;
+            var best_ind = 0;
+            for (var j = 0; j < last_orders.length; j++) {
+                var mi = evalOrder(i,last_orders[j]);
+                if(mi > best_val){
+                    best_val = mi;
+                    best_ind = j;
+                }
+            }
+            res.push(last_orders[best_ind]);
+        }
     }
     console.log(res);
-    return res;
+    for(let i = 0; i<t.length; i++){
+        t[i].order(res[i], res[i]);
+        if(i > 0){
+            link_transitions.push(minLinks(res[i-1],res[i]));
+        }
+    }
+    return computeQualities(t,str,-1);
 }
 
-function averageMI(ti, orders){
+function averageEval(timestep, orders){
     var sum = 0;
     for (var i = 0; i < orders.length; i++) {
-        sum += get_MI(ti,orders[i]);
+        sum += evalOrder(timestep,orders[i]);
     }
     return sum / orders.length;
 }
 
-function possibly_add(ti,new_orders,order){
+function pathEval(path){
+    var sum = 0;
+    for (var i = 0; i < path.length; i++) {
+//        console.log(path[i]);
+        sum += evalOrder(i,path[i]);
+    }
+    return sum / path.length;
+}
+
+// The function assumes a list of neworders that are the best right now and check if order is worthy of joining, replacing some of them
+
+function possibly_add(timestep,new_orders,order){
     if(new_orders.length < 10){
         new_orders.push(order);
         return new_orders;
     }
-    var candidate = -1;
-    // Check how many are similar
+    
+//    var candidate = -1;
+//    // Check how many are similar
+//    for (var i = 0; i < new_orders; i++) {
+//        if(difference(order,new_orders[i]) <= 2){
+//            // Two are similar, it can never be added
+//            if(candidate >= 0){
+//                return new_orders;
+//            }
+//            candidate = i;
+//        }
+//    }
+//    // One is similar
+//    if(candidate >= 0){
+//        if(evalOrder(timestep,order) > evalOrder(timestep,new_orders[candidate])){
+//            new_orders[candidate] = order;
+//        }
+//        return new_orders;
+//    }
+//    // None is similar, get the best one
+//    candidate = 0;
+//    for (var i = 1; i < new_orders.length; i++) {
+//        if(evalOrder(timestep,new_orders[i]) < evalOrder(timestep,new_orders[candidate])){
+//            candidate = i;
+//        }
+//    }
+//    new_orders[candidate] = order;
+//    return new_orders;
+    
+    // A lot of cachinng..
+    var orderMI = evalOrder(timestep, order);
+    var lowest = new_orders.length;
+    var lowestMI = orderMI;
+    var similar_lower = [];
     for (var i = 0; i < new_orders; i++) {
-        if(difference(order,new_orders[i]) <= 2){
-            // Two are similar, it can never be added
-            if(candidate >= 0){
+        var checkOrder = new_orders[i];
+        var evalI = evalOrder(timestep,checkOrder);
+        if(evalI > orderMI){
+            if(difference(order,checkOrder) <= 4){
+                // Something similar and better is in new_orders
                 return new_orders;
             }
-            candidate = i;
+        }
+        else{
+            if(difference(order,checkOrder) <= 4){
+                similar_lower.push(i);
+            }
+        }
+        if(evalI < lowestMI){
+            lowestMI = evalI;
+            lowest = i;
         }
     }
-    // One is similar
-    if(candidate >= 0){
-        if(get_MI(ti,order) > get_MI(ti,new_orders[candidate])){
-            new_orders[candidate] = order;
-        }
+    // Order is worse than everything in new_orders currently
+    if(lowest === new_orders.length){
         return new_orders;
     }
-    // None is similar, get the best one
-    candidate = 0;
-    for (var i = 1; i < new_orders.length; i++) {
-        if(get_MI(ti,new_orders[i]) < get_MI(ti,new_orders[candidate])){
-            candidate = i;
+    var res = [];
+    var similar_index = 0;
+    // Construct the result
+    for (var i = 0; i < new_orders.length; i++) {
+        if(similar_lower.length === 0){
+            // Toss the worst
+            if(i !== lowest){
+                res.push(new_orders[i]);
+            }
+        }
+        else{
+            // Toss everything similar
+            if(similar_index === similar_lower.length || i !== similar_lower[similar_index]){
+                res.push(new_orders[i]);
+            }
+            else{
+                similar_index += 1;
+            }
         }
     }
-    new_orders[candidate] = order;
-    return new_orders;
+    res.push(order);
+    return res;
+    
+    
+}
+// The function assumes a list of neworders that are the best right now and check if order is worthy of joining, replacing some of them
+function possibly_add_path(new_paths,path,new_MIs, MI){
+    if(new_paths.length < 10){
+        new_paths.push(path);
+        new_MIs.push(MI);
+        return [new_paths,new_MIs];
+    }
+    
+    var order = path[path.length-1];
+    
+    var similar_lower = [];
+    var lowestMI = MI;
+    var lowest = new_paths.length;
+//    return new_paths, new_MIs;
+    for (var i = 0; i < new_paths.length; i++) {
+        var checkOrder = new_paths[i][new_paths[i].length-1];
+        if(new_MIs[i] > MI){
+            if(difference(order,checkOrder) <= 4){
+                // Something similar and better is in new_orders
+                return [new_paths,new_MIs];
+            }
+        }
+        else{
+            if(difference(order,checkOrder) <= 4){
+                similar_lower.push(i);
+            }
+        }
+        if(new_MIs[i] < lowestMI){
+            lowestMI = new_MIs[i];
+            lowest = i;
+        }
+    }
+    // Order is worse than everything in new_orders currently
+    if(lowest === new_paths.length){
+        return [new_paths,new_MIs];
+    }
+    var res1 = [];
+    var res2 = [];
+    var similar_index = 0;
+    // Construct the result
+    for (var i = 0; i < new_paths.length; i++) {
+        if(similar_lower.length === 0){
+            // Toss the worst
+            if(i !== lowest){
+                res1.push(new_paths[i]);
+                res2.push(new_MIs[i]);
+            }
+        }
+        else{
+            // Toss everything similar
+            if(similar_index === similar_lower.length || i !== similar_lower[similar_index]){
+                res1.push(new_paths[i]);
+                res2.push(new_MIs[i]);
+            }
+            else{
+                similar_index += 1;
+            }
+        }
+    }
+    res1.push(clone(path));
+    res2.push(MI);
+    return [res1,res2];
     
     
 }
@@ -895,17 +1112,15 @@ function map_reachable(order,reachable){
 }
 
 function near_simultaneous_incremental(t,str){
-    var simul_order = simultaneous_l2_leaf_order_permute(t,str,false);
-    console.log(simul_order);
+    var simul_order = simultaneous_morans_leaf_order_permute(t,str,false);
     var reachable = get_reachable_orders(simul_order,1);
-    console.log(reachable);
     var orders = [];
     for (var i = 0; i < t.length; i++) {
         var highest = -2;
         var highest_index = 0;
         for (var j = 0; j < reachable.length; j++) {
             var simul_order = reachable[j];
-            var mi = get_MI(t[i],simul_order);
+            var mi = evalOrder(i,simul_order);
             console.log(mi);
             if(mi > highest && (i === 0 || minLinks(orders[i-1],reachable[j]).length <= 2)){
                 highest = mi;
@@ -916,7 +1131,7 @@ function near_simultaneous_incremental(t,str){
         console.log(highest);
     }
     for(let i = 0; i<t.length; i++){
-        t[i].order(orders[i], reachable[i]);
+        t[i].order(orders[i], orders[i]);
         if(i > 0){
             link_transitions.push(minLinks(orders[i-1],orders[i]));
         }
@@ -1062,22 +1277,259 @@ function doLink(order,l){
     return neworder;
 }
 
+function near_simultaneous_dag(t,str){
+    // Create DAG / adjacency list
+    var simul_order = simultaneous_morans_leaf_order_permute(t,str,false);
+    var reachable = get_reachable_orders(simul_order,1);
+    var adjacencylist = [];
+    for (var i = 0; i < reachable.length; i++) {
+        var fromi = [];
+        if(i%100 === 0){
+            console.log(i + " of " + reachable.length);
+        }
+        for (var j = 0; j < reachable.length; j++) {
+            if(minLinks(reachable[i],reachable[j]).length <= 2){
+                fromi.push(j);
+            }
+        }
+        adjacencylist.push(fromi);
+    }
+    // O(V+E) computes MIs per timestep and the best paths to them
+    // Keep one path per vertex: the best one,
+    // a path is valued on the total of MIs
+    var all_refs = [];
+    var nodevalues = [];
+    var fill = [];
+    for (var i = 0; i < reachable.length; i++) {
+        nodevalues.push(evalOrder(0,reachable[i]));
+        fill.push(0);
+    }
+    // Push a useless array so that the indices match up
+    all_refs.push(fill);
+    for (var i = 1; i < t.length; i++) {
+        console.log("Timestep " + i);
+        var irefs = [];
+        var try_values = [];
+        for (var j = 0; j < reachable.length; j++) {
+            try_values.push(Number.NEGATIVE_INFINITY);
+            irefs.push(0);
+        }
+        for (var j = 0; j < adjacencylist.length; j++) {
+            var neighbors = adjacencylist[j];
+            for (var k = 0; k < neighbors.length; k++) {
+                var reach = neighbors[k];
+                var value = nodevalues[j] + evalOrder(i,reachable[reach]);
+                if(value > try_values[reach]){
+                    try_values[reach] = value;
+                    irefs[reach] = j;
+                }
+                
+            }
+        }
+        nodevalues = try_values;
+        all_refs.push(irefs);
+    }
+    var best = 0;
+    for (var i = 0; i < nodevalues.length; i++) {
+        if(nodevalues[best] < nodevalues[i]){
+            best = i;
+        }
+    }
+    var orders = [];
+    for (var i = 0; i < t.length; i++) {
+        orders.push([]);
+    }
+    var lastindex = best;
+    orders[t.length-1] = reachable[lastindex];
+    for (var i = t.length-2; i >= 0; i--) {
+        var index = all_refs[i+1][lastindex];
+        orders[i] = reachable[index];
+        lastindex = index;
+    }
+    for(let i = 0; i<t.length; i++){
+        t[i].order(orders[i], orders[i]);
+        if(i > 0){
+            link_transitions.push(minLinks(orders[i-1],orders[i]));
+        }
+    }
+    return computeQualities(t,str,-1);
+    
+}
+
+function interpolate_linearly(t,str){
+    var identity = [];
+    for (var i = 0; i < t[0].n; i++) {
+        identity.push(i);
+    }
+    var id_reachable = get_reachable_orders(identity,1);
+    var start = max_mi_gx(t,str,0);
+    var end = max_mi_gx(t,str,t.length-1);
+    var res = [start];
+    for (var i = 1; i < t.length-1; i++) {
+        var best_value = Number.NEGATIVE_INFINITY;
+        var best_index = 0;
+        var reachable = map_reachable(res[i-1],id_reachable);
+        for (var j = 0; j < reachable.length; j++) {
+            if(can_interpolate_to(reachable[j],end,(t.length-1)-i)){
+                var score = evalOrder(i,reachable[j]);
+                if(score > best_value){
+                    best_value = score;
+                    best_index = j;
+                }
+            }
+        }
+        res.push(reachable[best_index]);
+    }
+    res.push(end);
+    console.log(res);
+    for (var i = 0; i < t.length; i++) {
+        t[i].order(res[i], res[i]);
+        if(i > 0){
+            link_transitions.push(minLinks(res[i-1],res[i]));
+        }
+    }
+    return computeQualities(t,str,-1);
+}
+
+function interpolate_twoway(t,str){
+    var identity = [];
+    for (var i = 0; i < t[0].n; i++) {
+        identity.push(i);
+    }
+    var id_reachable = get_reachable_orders(identity,1);
+    var start = max_mi_gx(t,str,0);
+    var end = max_mi_gx(t,str,t.length-1);
+    var res = [start];
+    var res_inv = [end];
+    for (var i = 2; i < t.length; i++) {
+        if(i % 2 === 0){
+            var best_value = Number.NEGATIVE_INFINITY;
+            var best_index = 0;
+            var reachable = map_reachable(res[res.length-1],id_reachable);
+            for (var j = 0; j < reachable.length; j++) {
+                if(can_interpolate_to(reachable[j],res_inv[res_inv.length-1],(t.length-1)-i)){
+                    var score = evalOrder(Math.floor(i/2),reachable[j]);
+                    if(score > best_value){
+                        best_value = score;
+                        best_index = j;
+                    }
+                }
+            }
+            res.push(reachable[best_index]);
+        }
+        else{
+            var best_value = Number.NEGATIVE_INFINITY;
+            var best_index = 0;
+            var reachable = map_reachable(res_inv[res_inv.length-1],id_reachable);
+            for (var j = 0; j < reachable.length; j++) {
+                if(can_interpolate_to(reachable[j],res[res.length-1],(t.length-1)-i)){
+                    var score = evalOrder((t.length-1)-Math.floor(i/2),reachable[j]);
+                    if(score > best_value){
+                        best_value = score;
+                        best_index = j;
+                    }
+                }
+            }
+            res_inv.push(reachable[best_index]);
+        }
+    }
+    for (var i = res_inv.length-1; i >= 0; i--) {
+        res.push(res_inv[i]);
+    }
+    console.log(res);
+    for (var i = 0; i < t.length; i++) {
+        t[i].order(res[i], res[i]);
+        if(i > 0){
+            link_transitions.push(minLinks(res[i-1],res[i]));
+        }
+    }
+    return computeQualities(t,str,-1);
+    
+}
+
+function can_interpolate_to(a,b,batches){
+    //Count changes
+    var changes = 0;
+    for (var i = 0; i < a.length; i++) {
+        if(a[i] === b[i]){
+            changes += 1;
+        }
+    }
+    return batches >= changes;
+}
+
 function all_equal(a,b,c,d){
     return a === b && a === c && a === d && b === c && b === d && c === d;
 }
 
-function get_MI(t,order){
+function precompute(){
+    precomputedMI = [];
+    for (var i = 0; i < matrices.length; i++) {
+        // Compute n and m
+        var matrix = [];
+        
+        var n = 0;
+        var m = 0;
+        for (var x = 0; x < matrices[i].length; x++) {
+            for (var y = 0; y < matrices[i][0].length; y++) {
+                n++;
+                if(matrices[i][x][y] === 1){
+                    m++;
+                }
+            }
+        }
+        
+        for (var j = 0; j < matrices[i].length; j++) {
+            var rowj = [];
+            for (var k = 0; k < matrices[i].length; k++) {
+                // Add mi gain to matrix;
+                rowj.push(weighted_value_rows(matrices[i][j],matrices[i][k],n,m))
+            }
+            matrix.push(rowj);
+        }
+        precomputedMI.push(matrix);
+    }
+}
+
+function evalOrder(timestep,order){
+    var sum = 0;
+    for (var i = 0; i < order.length-1; i++) {
+        sum += precomputedMI[timestep][order[i]][order[i+1]];
+    }
+    return sum;
+}
+
+function get_MI(ti,order){
     var permuted = [];
-    for (var a = 0; a < t[i].row_perm.length; a++) {
+    for (var a = 0; a < ti.row_perm.length; a++) {
         permuted.push([]);
-        for (var b = 0; b < t[i].col_perm.length; b++) {
-            permuted[a].push(t[i].matrix[order[a]][order[b]]);
+        for (var b = 0; b < ti.col_perm.length; b++) {
+            permuted[a].push(ti.matrix[order[a]][order[b]]);
         }
     }
-    var mi = t[i].computeMorans(permuted)[0];
+    var mi = ti.computeMorans(permuted)[0];
     return mi;
 }
-      
+     
+// Shallow copy
+function clone(array){
+    return array.slice();
+}
+// ===========================================================================================================================================
+// ======================================== KEEP OUT !! -- Data Generation !! -- KEEP OUT ====================================================
+// ===========================================================================================================================================
+
+function flip_cells(matrix,chance){
+    for (var i = 0; i < matrix.length; i++) {
+        for (var j = 0; j < matrix[0].length; j++) {
+            if(Math.random() < chance){
+                matrix[i][j] = Math.abs(matrix[i][j]-1);
+            }
+        }   
+    }
+}
+
+
     </script>
 </html>
 
