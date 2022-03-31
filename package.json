@@ -27,7 +27,8 @@
          "url": "http://www.aviz.fr/~fekete"
       }
    ],
-   "scripts": {"start": "node rollup.config.dev.js rollup -c",
+   "scripts": {
+      "start": "node rollup.config.dev.js rollup -c",
       "build": "rollup -c",
       "dev": "rollup -c rollup.config.dev.js -w",
       "pretest": "npm run build",

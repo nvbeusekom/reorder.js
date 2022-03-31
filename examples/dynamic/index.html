@@ -55,8 +55,8 @@ line {
           <option value="gensd5">Generated data - slow drift 5% noise</option>
           <option value="gensd10">Generated data - slow drift 10% noise</option>
           <option value="genfd0">Generated data - fast drift 0% noise</option>
-          <option value="genfd5">Generated data - fast drift 0% noise</option>
-          <option value="genfd10">Generated data - fast drift 0% noise</option>
+          <option value="genfd5">Generated data - fast drift 5% noise</option>
+          <option value="genfd10">Generated data - fast drift 10% noise</option>
           <option value="gensj0">Generated data - single jump 0% noise</option>
           <option value="gensj5">Generated data - single jump 5% noise</option>
           <option value="gensj10">Generated data - single jump 10% noise</option>
@@ -70,7 +70,9 @@ line {
         <div style="margin-top:4px;margin-bottom: 4px">
         <button type="button" onclick="random_permute(tables,'quality')">Random Order</button>
         <button type="button" onclick="initial_order_permute(tables,'quality')">Initial Order</button>
-        <button type="button" id ="stats">Get stats</button>
+        <button type="button" onclick="run_all_experiments(tables)">Get stats</button>
+        <button type="button" onclick="max_mi_all(tables,'quality')">Optimize Moran's I (NN-2OPT)</button>
+        <button type="button" onclick="lo_mi_all(tables,'quality')">Leaf Order Morans I distance</button>
         <button type="button" onclick="max_mi_gx(tables,'quality',-1,true)">Optimize Moran's I (NN-2OPT) on Graph Gx</button>
         
         </div>
@@ -196,21 +198,138 @@ function computeQualities(t,str,time){
             kdiff.push(minLinks(p1,p2).length);
         }
     }
-    console.log("CSV format below");
-    gen_csv(moran,kdiff);
     document.getElementById(str+"mean").innerHTML = "Mean<br>BW: " + d3.mean(bandwidth) + "<br>PR: " + d3.mean(profile) + "<br>LA: " + d3.mean(linarr)  + "<br>MI: " + d3.mean(moran)   + "<br>Time: " + time;
     document.getElementById(str+"min").innerHTML = "Min<br>BW: " + d3.min(bandwidth) + "<br>PR: " + d3.min(profile) + "<br>LA: " + d3.min(linarr) + "<br>MI: " + d3.min(moran);
     document.getElementById(str+"max").innerHTML = "Max<br>BW: " + d3.max(bandwidth) + "<br>PR: " + d3.max(profile) + "<br>LA: " + d3.max(linarr) + "<br>MI: " + d3.max(moran);
     document.getElementById(str+"med").innerHTML = "Median<br>BW: " + d3.median(bandwidth) + "<br>PR: " + d3.median(profile) + "<br>LA: " + d3.median(linarr) + "<br>MI: " + d3.median(moran);
+    return gen_csv(moran,kdiff);
 }
 
 function gen_csv(moran,kdiff){
-    var res = "Morans I,Change\n";
-    for (var i = 0; i < kdiff.length; i++) {
-        res += moran[i] + "," + kdiff[i] + "\n";
+    var res1 = "";
+    var res2 = "";
+    for (var i = 0; i < kdiff.length-1; i++) {
+        res1 += moran[i] + ",";
+        res2 += kdiff[i] + ",";
     }
-    res += moran[moran.length-1] + ",";
-    console.log(res);
+    res2 += kdiff[kdiff.length-1] + "\n";
+    res1 += moran[moran.length-2] + "," + moran[moran.length-1] + "\n";
+    return [res1,res2];
+}
+
+
+function run_all_experiments(t){
+    var obj = {};
+    var header = "algorithm";
+    for (var i = 0; i < t.length; i++) {
+        header += "," + (i+1);
+    }
+    header += "\n";
+    var mires = header;
+    var kdiffres = header;
+    
+    lo_mi_all(t,'quality');
+    var stats = computeQualities(t,'quality',0);
+    mires += "O," + stats[0];
+    kdiffres += "O," + stats[1];
+
+    matrices = print_all(t);
+    links = printLinks(link_transitions);
+    obj["Morans I-based Leaf Order"] = {};
+    obj["Morans I-based Leaf Order"]["matrices"] = matrices;
+    obj["Morans I-based Leaf Order"]["links"] = links;
+
+//    max_mi_all(t,'quality');
+//    stats = computeQualities(t,'quality',0);
+//    mires += "NN-2OPT All," + stats[0];
+//    kdiffres += "NN-2OPT All," + stats[1];
+//
+//    matrices = print_all(t);
+//    links = printLinks(link_transitions);
+//    obj["NN-2OPT All"] = {};
+//    obj["NN-2OPT All"]["matrices"] = matrices;
+//    obj["NN-2OPT All"]["links"] = links;
+    
+    greedy_lookahead(t,'quality');
+    stats = computeQualities(t,'quality',0);
+    mires += "LG," + stats[0];
+    kdiffres += "LG," + stats[1];
+
+    matrices = print_all(t);
+    links = printLinks(link_transitions);
+    obj["Lookahead Greedy"] = {};
+    obj["Lookahead Greedy"]["matrices"] = matrices;
+    obj["Lookahead Greedy"]["links"] = links;
+    
+    greedy_topk(t,'quality');
+    stats = computeQualities(t,'quality',0);
+    mires += "DG," + stats[0];
+    kdiffres += "DG," + stats[1];
+
+    matrices = print_all(t);
+    links = printLinks(link_transitions);
+    obj["Diverse Greedy"] = {};
+    obj["Diverse Greedy"]["matrices"] = matrices;
+    obj["Diverse Greedy"]["links"] = links;
+    
+    near_simultaneous_incremental(t,'quality');
+    stats = computeQualities(t,'quality',0);
+    mires += "GS+," + stats[0];
+    kdiffres += "GS+," + stats[1];
+
+    matrices = print_all(t);
+    links = printLinks(link_transitions);
+    obj["Greedy Simultaneous"] = {};
+    obj["Greedy Simultaneous"]["matrices"] = matrices;
+    obj["Greedy Simultaneous"]["links"] = links;
+    
+    near_simultaneous_dag(t,'quality');
+    stats = computeQualities(t,'quality',0);
+    mires += "OS+," + stats[0];
+    kdiffres += "OS+," + stats[1];
+
+    matrices = print_all(t);
+    links = printLinks(link_transitions);
+    obj["Optimal Simultaneous"] = {};
+    obj["Optimal Simultaneous"]["matrices"] = matrices;
+    obj["Optimal Simultaneous"]["links"] = links;
+    
+    interpolate_linearly(t,'quality');
+    stats = computeQualities(t,'quality',0);
+    mires += "LI," + stats[0];
+    kdiffres += "LI," + stats[1];
+
+    matrices = print_all(t);
+    links = printLinks(link_transitions);
+    obj["Linear Interpolation"] = {};
+    obj["Linear Interpolation"]["matrices"] = matrices;
+    obj["Linear Interpolation"]["links"] = links;
+    
+    interpolate_twoway(t,'quality');
+    stats = computeQualities(t,'quality',0);
+    mires += "BI," + stats[0];
+    kdiffres += "BI," + stats[1];
+
+    matrices = print_all(t);
+    links = printLinks(link_transitions);
+    obj["Bidirectional Interpolation"] = {};
+    obj["Bidirectional Interpolation"]["matrices"] = matrices;
+    obj["Bidirectional Interpolation"]["links"] = links;
+    
+    simultaneous_morans_leaf_order_permute(t,'quality',false,true);
+    stats = computeQualities(t,'quality',0);
+    mires += "S," + stats[0];
+    kdiffres += "S," + stats[1];
+
+    var matrices = print_all(t);
+    var links = printLinks(link_transitions);
+    obj["Simultaneous with Morans I-based LO"] = {};
+    obj["Simultaneous with Morans I-based LO"]["matrices"] = matrices;
+    obj["Simultaneous with Morans I-based LO"]["links"] = links;
+
+    console.log(mires);
+    console.log(kdiffres);
+    console.log(obj);
 }
 
 function initial_order_permute(t,str) {
@@ -229,6 +348,142 @@ function random_permute(t,str) {
         t[i].order(r1,r1);
       }
       computeQualities(t,str);
+}
+
+function lo_mi_all(t,str){
+    var start = new Date().getTime();
+    var orders = [];
+    for (var timestep = 0; timestep < t.length; timestep++) {
+        var n = 0;
+        var m = 0;
+        for (var i = 0; i < matrices[timestep].length; i++) {
+            for (var j = 0; j < matrices[timestep][0].length; j++) {
+                n++;
+                m += matrices[timestep][i][j];
+            }
+        }
+
+      var dist = [];
+        for(var i=0 ; i< matrices[timestep].length; i++){
+            if(!dist[i]){
+                    dist.push([]);
+            }
+            for(var j=0 ; j<matrices[timestep][0].length ; j++){
+                if(!dist[i][j]){
+                    dist[i].push(0);
+                }
+                var d = weighted_value_rows(matrices[timestep][i],matrices[timestep][j],n,m);
+                dist[i][j] = -d;
+            }
+        }
+      
+      var order = reorder.optimal_leaf_order();
+      var row_perm = order.distanceMatrix(dist)(matrices[0]);
+      orders.push(row_perm);
+    }
+    link_transitions = [];
+    orders[orders.length-1] = get_last_order(orders[orders.length-1]);
+    for (var i = 0; i < t.length; i++) {
+        t[i].order(orders[i], orders[i]);
+        if(i > 0){
+            link_transitions.push(minLinks(orders[i-1],orders[i]));
+        }
+    }
+    var end = new Date().getTime();
+    var time = end - start;
+    computeQualities(t,str,time);
+}
+
+function max_mi_all(t,str){
+    var start = new Date().getTime();
+    var orders = [];
+    for (var timestep = 0; timestep < t.length; timestep++) {
+        var rows = reorder.permutation(matrices[timestep].length);
+
+        var n = 0;
+        var m = 0;
+        for (var i = 0; i < matrices[timestep].length; i++) {
+            for (var j = 0; j < matrices[timestep][0].length; j++) {
+                n++;
+                if(matrices[timestep][i][j] === 1){
+                    m++;
+                }
+            }
+        }
+        var all_best_morans = Number.NEGATIVE_INFINITY;
+        var all_best_order = [];
+        for (var init = 0; init < rows.length; init++) {
+            var initial = rows[init];
+            var res_timestep = [];
+            res_timestep.push(initial);
+            while(res_timestep.length < rows.length){
+              var nearest = -1;
+              for (var i = 0; i < rows.length; i++) {
+                  if(!res_timestep.includes(rows[i])){
+                      var last = matrices[timestep][res_timestep[res_timestep.length-1]];
+                      var r1 = matrices[timestep][rows[i]];
+                      var r2 = matrices[timestep][nearest];
+                      if(nearest === -1){
+                          nearest = rows[i];
+                      }
+                      else if(weighted_value_rows(last,r1,n,m) > weighted_value_rows(last,r2,n,m)){
+                          nearest = rows[i];
+                      }
+
+                  }
+              }
+
+              res_timestep.push(nearest);
+            }
+            var best_order = res_timestep;
+            var best_morans = evalOrder(timestep,best_order);
+            var oldm = best_morans - 1;
+            var newm = best_morans;
+            while(newm-oldm > 0.0001){
+                for (var i = 0; i < res_timestep.length; i++) {
+                    for (var j = i+2; j < res_timestep.length-1; j++) {
+                        // i and i+1 and j and j+1
+                        var check = [];
+                        for (var n = 0; n < res_timestep.length; n++) {
+                            check[n] = res_timestep[n];
+                        }
+                        check[i+1] = res_timestep[j];
+                        check[j] = res_timestep[i+1];
+                        for (var x = 0; x < (j-(i+1)); x++) {
+                             check[i+1+x] = res_timestep[j-x];
+                        }
+                        var oldq = weighted_value_rows(matrices[timestep][res_timestep[i]],matrices[timestep][res_timestep[i+1]],n,m) + weighted_value_rows(matrices[timestep][res_timestep[j]],matrices[timestep][res_timestep[j+1]],n,m);
+                        var newq = weighted_value_rows(matrices[timestep][check[i]],matrices[timestep][check[i+1]],n,m) + weighted_value_rows(matrices[timestep][check[j]],matrices[timestep][check[j+1]],n,m);
+                        if(newq > oldq){
+                            res_timestep = check;
+                        }
+                    }
+                }
+                oldm = newm;
+                newm = evalOrder(timestep,res_timestep);
+                if(newm > best_morans){
+                    best_morans = newm;
+                    best_order = res_timestep;
+                }
+            }
+            if(best_morans > all_best_morans){
+                all_best_morans = best_morans;
+                all_best_order = best_order;
+            }
+        }
+        orders.push(all_best_order);
+    }
+    link_transitions = [];
+    orders[orders.length-1] = get_last_order(orders[orders.length-1]);
+    for (var i = 0; i < t.length; i++) {
+        t[i].order(orders[i], orders[i]);
+        if(i > 0){
+            link_transitions.push(minLinks(orders[i-1],orders[i]));
+        }
+    }
+    var end = new Date().getTime();
+    var time = end - start;
+    computeQualities(t,str,time);
 }
 
 function max_mi_gx(t,str, timestep, do_order) {
@@ -676,6 +931,7 @@ function simultaneous_morans_leaf_order_permute(t,str,square, do_order) {
     
     var end = new Date().getTime();
     var time = end - start;
+    link_transitions = [];
     for(let i = 0; i<t.length; i++){
       t[i].order(row_perm, row_perm);
     }
@@ -819,6 +1075,8 @@ function simultaneous_barycenter_permute(t,str) {
 
 function print_all(tables){
     let output = "";
+//    console.log("printing");
+//    console.log(tables);
     for (var i = 0; i < tables.length; i++) {
         if(false){
             if(i === 0 || i === 47 || i === 95){
@@ -831,7 +1089,8 @@ function print_all(tables){
             output += "\n";
         }
     }
-    console.log(output);
+//    console.log(output);
+    return output;
 }
 
 // Not really stable
@@ -919,8 +1178,8 @@ function optimal_unstable(t,str){
 
 function printLinks(l){
         var res = "";
-        console.log("printing:");
-        console.log(l);
+//        console.log("printing:");
+//        console.log(l);
         for (var i = 0; i < l.length; i++) {
             res += i.toString();
             res += '\n';
@@ -929,7 +1188,7 @@ function printLinks(l){
                 res += '\n';
             }
         }
-        console.log(res);
+//        console.log(res);
         return res;
 }
 //minLinks([1,2,3,4],[3,1,2,4]);
@@ -1046,6 +1305,7 @@ function greedy_topk(t,str) {
             best = i;
         }
     }
+    link_transitions = [];
     var res = paths[best];
     for (var i = 0; i < t.length; i++) {
         t[i].order(res[i], res[i]);
@@ -1104,6 +1364,7 @@ function greedy_lookahead(t,str) {
         }
     }
     console.log(res);
+    link_transitions = [];
     for(let i = 0; i<t.length; i++){
         t[i].order(res[i], res[i]);
         if(i > 0){
@@ -1331,6 +1592,7 @@ function near_simultaneous_incremental(t,str){
         }
         orders.push(reachable[highest_index]);
     }
+    link_transitions = [];
     for(let i = 0; i<t.length; i++){
         t[i].order(orders[i], orders[i]);
         if(i > 0){
@@ -1417,13 +1679,15 @@ function add_move(order,links, nr_moves){
                                 newlinks.push(link1);
                                 var neworder1 = do_move_link(order,link1, bool);
                                 outcomes = outcomes.concat(add_move(neworder1,newlinks,nr_moves-1));
-                                var newlinks1 = [...links];
-                                newlinks1.push(link1);
-                                var neworder1 = do_swap_link(order,link1,bool);
-                                outcomes = outcomes.concat(add_move(neworder1,newlinks1,nr_moves-1));
+                                if(!bool || i !== j){ // No need to invert single swaps
+                                    var newlinks1 = [...links];
+                                    newlinks1.push(link1);
+                                    neworder1 = do_swap_link(order,link1,bool);
+                                    outcomes = outcomes.concat(add_move(neworder1,newlinks1,nr_moves-1));
+                                }
                             }
-                        }
-                        else if(!all_equal(i,j,k,l)){
+                        } // No need to invert singles
+                        else if(i !== j){
                             for (var bool = 0; bool <= 1; bool++) {
                                 var newlinksInv = [...links];
                                 var link2 = new link(i,j,k,l,true);
@@ -1465,7 +1729,6 @@ function do_move_link(order,l,inv){
             b++;
         }
     }
-    var intermediate = [...neworder];
     // Move the rest
     // Link is going down
     if(l.topleft < l.topright){
@@ -1512,10 +1775,13 @@ function hasDuplicates(array) {
 }
 
 function do_swap_link(order,l, inv){
-    if(l.topleft >= l.topright && l.botleft > l.topright){
+    // BUG
+    // Going up
+    if(l.topleft >= l.topright && l.topleft <= l.botright){
         return do_move_link(order,l,inv);
     }
-    if(l.topleft <= l.topright && l.topleft < l.botright){
+    // Going down
+    if(l.topleft <= l.topright && l.botleft >= l.topright){
         return do_move_link(order,l,inv);
     }
     var neworder = [...order];
@@ -1536,7 +1802,6 @@ function do_swap_link(order,l, inv){
             b++;
         }
     }
-    var intermediate = [...neworder];
     // Move the rest
     if(!inv){
         var a = l.topright;
@@ -1627,6 +1892,7 @@ function near_simultaneous_dag(t,str){
         orders[i] = reachable[index];
         lastindex = index;
     }
+    link_transitions = [];
     for(let i = 0; i<t.length; i++){
         t[i].order(orders[i], orders[i]);
         if(i > 0){
@@ -1654,7 +1920,6 @@ function get_last_order(order){
     }
     return order;
 }
-
 function interpolate_linearly(t,str){
     var identity = [];
     for (var i = 0; i < t[0].n; i++) {
@@ -1667,9 +1932,18 @@ function interpolate_linearly(t,str){
     var res = [start];
     for (var i = 1; i < t.length-1; i++) {
         var best_value = Number.NEGATIVE_INFINITY;
-        var best_index = 0;
+        var best_index = -1;
+        console.log(can_interpolate_to(res[i-1],end,t.length-i));
         var reachable = map_reachable(res[i-1],id_reachable);
+        console.log("T" + i);
+        console.log("Checking " + reachable.length + " candidates");
+        console.log("Last changes: " + nr_changes(res[i-1],end));
+        console.log(res[i-1]);
+        console.log(end);
         for (var j = 0; j < reachable.length; j++) {
+//            if(same_array(reachable[j],[0,25,9,16,1,21,27,10,20,24,22,17,6,8,26,23,3,4,5,18,11,14,13,15,2,12,7,28,19])){
+//                console.log("ITS IN HERE!");
+//            }
             if(can_interpolate_to(reachable[j],end,(t.length-1)-i)){
                 var score = evalOrder(i,reachable[j]);
                 if(score > best_value){
@@ -1678,10 +1952,16 @@ function interpolate_linearly(t,str){
                 }
             }
         }
+        if(best_index === -1){
+            console.log("Interpolation not possible");
+            return;
+        }
+        console.log("Found order for t" + i);
         res.push(reachable[best_index]);
     }
     res.push(end);
     console.log(res);
+    link_transitions = [];
     for (var i = 0; i < t.length; i++) {
         t[i].order(res[i], res[i]);
         if(i > 0){
@@ -1738,6 +2018,7 @@ function interpolate_twoway(t,str){
         res.push(res_inv[i]);
     }
     console.log(res);
+    link_transitions = [];
     for (var i = 0; i < t.length; i++) {
         t[i].order(res[i], res[i]);
         if(i > 0){
@@ -1748,15 +2029,38 @@ function interpolate_twoway(t,str){
     
 }
 
-function can_interpolate_to(a,b,batches){
-    //Count changes
+
+function nr_changes(a,b){
     var changes = 0;
     for (var i = 0; i < a.length; i++) {
-        if(a[i] === b[i]){
+        if(a[i] !== b[i]){
             changes += 1;
         }
     }
-    return batches >= changes;
+    return changes;
+}
+
+function can_interpolate_to(a,b,batches){
+//    return batches >= nr_changes(a,b);
+    var m = minLinks(a,b).length;
+    return batches >= (m + count_gaps(a,b))-1;
+}
+
+function count_gaps(a,b){
+    var ingap = a[0] === b[0];
+    var gaps = 0;
+    for (var i = 1; i < a.length; i++) {
+        if(!ingap && a[i] === b[i]){
+            gaps += 1;
+            ingap = true;
+        }
+        if(ingap && a[i] !== b[i])
+            ingap = false;
+    }
+    if(a[a.length-1] === b[b.length-1]){
+        gaps = gaps - 1;
+    }
+    return gaps;
 }
 
 function all_equal(a,b,c,d){
@@ -1874,6 +2178,7 @@ function generate_data(t){
         console.log(matrices);
     }
 }
+
 function generate_drifting_matrices(init_matrix,timesteps,chance,drift_speed, jumps){
     var res = [];
     res.push(flip_cells(init_matrix,chance));
