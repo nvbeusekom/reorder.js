@@ -391,6 +391,7 @@ function lo_mi_all(t,str){
     }
     var end = new Date().getTime();
     var time = end - start;
+    console.log(time/1000);
     computeQualities(t,str,time);
 }
 
@@ -483,6 +484,7 @@ function max_mi_all(t,str){
     }
     var end = new Date().getTime();
     var time = end - start;
+    console.log(time/1000);
     computeQualities(t,str,time);
 }
 
@@ -931,6 +933,7 @@ function simultaneous_morans_leaf_order_permute(t,str,square, do_order) {
     
     var end = new Date().getTime();
     var time = end - start;
+    console.log(time/1000);
     link_transitions = [];
     for(let i = 0; i<t.length; i++){
       t[i].order(row_perm, row_perm);
@@ -1248,6 +1251,7 @@ function arrayEquals(a, b) {
 }
 
 function greedy_topk(t,str) {
+    var start = new Date().getTime();
     var res = [];
     var identity = [];
     for (var i = 0; i < t[0].n; i++) {
@@ -1262,15 +1266,15 @@ function greedy_topk(t,str) {
         var new_paths = [];
         var new_MIs = [];
         for (var j = 0; j < paths.length; j++) {
-            console.log("Order " + j + " of timestep " + i);
+//            console.log("Order " + j + " of timestep " + i);
             // For each path look at the last order
             var order = clone(paths[j][paths[j].length-1]);
             var reachable = map_reachable(order,id_reachable);
             var candidate = clone(paths[j]);
             candidate.push(reachable[0]);
-            console.log(candidate);
-            console.log("Before")
-            console.log(new_paths);
+//            console.log(candidate);
+//            console.log("Before")
+//            console.log(new_paths);
             for (var k = 0; k < reachable.length; k++) {
                 // Make sure that the location of the added order is returned as well
                 if(i === 1){
@@ -1287,14 +1291,14 @@ function greedy_topk(t,str) {
                 new_paths = sol[0];
                 new_MIs = sol[1];
             }
-            console.log("After");
-            console.log(new_paths);
-            console.log(new_MIs);
+//            console.log("After");
+//            console.log(new_paths);
+//            console.log(new_MIs);
         }
         paths = clone(new_paths);
         MIs = clone(new_MIs);
-        console.log(paths);
-        console.log(MIs);
+//        console.log(paths);
+//        console.log(MIs);
 //        return;
     }
     console.log(paths);
@@ -1305,6 +1309,9 @@ function greedy_topk(t,str) {
             best = i;
         }
     }
+    var end = new Date().getTime();
+    var time = end - start;
+    console.log(time/1000);
     link_transitions = [];
     var res = paths[best];
     for (var i = 0; i < t.length; i++) {
@@ -1317,6 +1324,7 @@ function greedy_topk(t,str) {
 }
 
 function greedy_lookahead(t,str) {
+    var start = new Date().getTime();
     var res = [];
     var identity = [];
     for (var i = 0; i < t[0].n; i++) {
@@ -1331,7 +1339,7 @@ function greedy_lookahead(t,str) {
         var best_order = 0;
         var best_value = Number.NEGATIVE_INFINITY;
         for (var j = 0; j < last_orders.length; j++) {
-            console.log("Order " + j + " of timestep " + i);
+//            console.log("Order " + j + " of timestep " + i);
             var new_orders = [];
             var new_MIs = [];
             var reachable = map_reachable(last_orders[j],id_reachable);
@@ -1363,7 +1371,10 @@ function greedy_lookahead(t,str) {
             res.push(last_orders[best_ind]);
         }
     }
-    console.log(res);
+//    console.log(res);
+    var end = new Date().getTime();
+    var time = end - start;
+    console.log(time/1000);
     link_transitions = [];
     for(let i = 0; i<t.length; i++){
         t[i].order(res[i], res[i]);
@@ -1575,6 +1586,7 @@ function map_reachable(order,reachable){
 }
 
 function near_simultaneous_incremental(t,str){
+    var start = new Date().getTime();
     var simul_order = simultaneous_morans_leaf_order_permute(t,str,false);
     var reachable = get_reachable_orders(simul_order,1);
     var orders = [];
@@ -1592,6 +1604,9 @@ function near_simultaneous_incremental(t,str){
         }
         orders.push(reachable[highest_index]);
     }
+    var end = new Date().getTime();
+    var time = end - start;
+    console.log(time/1000);
     link_transitions = [];
     for(let i = 0; i<t.length; i++){
         t[i].order(orders[i], orders[i]);
@@ -1824,13 +1839,14 @@ function do_swap_link(order,l, inv){
 }
 
 function near_simultaneous_dag(t,str){
+    var start = new Date().getTime();
     // Create DAG / adjacency list
     var simul_order = simultaneous_morans_leaf_order_permute(t,str,false);
     var reachable = get_reachable_orders(simul_order,1);
     var adjacencylist = [];
     for (var i = 0; i < reachable.length; i++) {
         var fromi = [];
-        if(i%100 === 0){
+        if(i%1000 === 0){
             console.log(i + " of " + reachable.length);
         }
         for (var j = 0; j < reachable.length; j++) {
@@ -1892,6 +1908,9 @@ function near_simultaneous_dag(t,str){
         orders[i] = reachable[index];
         lastindex = index;
     }
+    var end = new Date().getTime();
+    var time = end - start;
+    console.log(time/1000);
     link_transitions = [];
     for(let i = 0; i<t.length; i++){
         t[i].order(orders[i], orders[i]);
@@ -1921,6 +1940,7 @@ function get_last_order(order){
     return order;
 }
 function interpolate_linearly(t,str){
+    var starttime = new Date().getTime();
     var identity = [];
     for (var i = 0; i < t[0].n; i++) {
         identity.push(i);
@@ -1933,13 +1953,13 @@ function interpolate_linearly(t,str){
     for (var i = 1; i < t.length-1; i++) {
         var best_value = Number.NEGATIVE_INFINITY;
         var best_index = -1;
-        console.log(can_interpolate_to(res[i-1],end,t.length-i));
+//        console.log(can_interpolate_to(res[i-1],end,t.length-i));
         var reachable = map_reachable(res[i-1],id_reachable);
         console.log("T" + i);
-        console.log("Checking " + reachable.length + " candidates");
-        console.log("Last changes: " + nr_changes(res[i-1],end));
-        console.log(res[i-1]);
-        console.log(end);
+//        console.log("Checking " + reachable.length + " candidates");
+//        console.log("Last changes: " + nr_changes(res[i-1],end));
+//        console.log(res[i-1]);
+//        console.log(end);
         for (var j = 0; j < reachable.length; j++) {
 //            if(same_array(reachable[j],[0,25,9,16,1,21,27,10,20,24,22,17,6,8,26,23,3,4,5,18,11,14,13,15,2,12,7,28,19])){
 //                console.log("ITS IN HERE!");
@@ -1960,7 +1980,10 @@ function interpolate_linearly(t,str){
         res.push(reachable[best_index]);
     }
     res.push(end);
-    console.log(res);
+//    console.log(res);
+    var endtime = new Date().getTime();
+    var time = endtime - starttime;
+    console.log(time/1000);
     link_transitions = [];
     for (var i = 0; i < t.length; i++) {
         t[i].order(res[i], res[i]);
@@ -1972,6 +1995,7 @@ function interpolate_linearly(t,str){
 }
 
 function interpolate_twoway(t,str){
+    var starttime = new Date().getTime();
     var identity = [];
     for (var i = 0; i < t[0].n; i++) {
         identity.push(i);
@@ -2017,7 +2041,10 @@ function interpolate_twoway(t,str){
     for (var i = res_inv.length-1; i >= 0; i--) {
         res.push(res_inv[i]);
     }
-    console.log(res);
+//    console.log(res);
+    var endtime = new Date().getTime();
+    var time = endtime - starttime;
+    console.log(time/1000);
     link_transitions = [];
     for (var i = 0; i < t.length; i++) {
         t[i].order(res[i], res[i]);
