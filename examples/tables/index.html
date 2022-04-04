@@ -17,7 +17,8 @@ line {
   </head>
   <body>
     <button type="button" onclick="random_permute()">Random Permute</button>
-    <button type="button" onclick="optimal_leaf_order_permute()">Optimal Leaf Order Permute</button>
+    <!--<button type="button" onclick="optimal_leaf_order_permute()">Leaf Order Permute (Eucledian Distance)</button>-->
+    <button type="button" onclick="gx_morans_leaf_order_permute()">Leaf Order Permute (Morans I Distance)</button>
     <button type="button" onclick="max_mi()">Maximize Moran's I</button>
     <button type="button" onclick="initial_order_permute()">Initial Order</button><br>
     <label for="size">Size:</label>
@@ -211,6 +212,37 @@ function max_mi() {
         }
     }
     t1.order(best_order, best_order);
+}
+
+function gx_morans_leaf_order_permute() {
+      var n = 0;
+        var m = 0;
+        for (var i = 0; i < matrix.length; i++) {
+            for (var j = 0; j < matrix[0].length; j++) {
+                n++;
+                m += matrix[i][j];
+            }
+        }
+
+      var dist = [];
+        for(var i=0 ; i< matrix.length; i++){
+            if(!dist[i]){
+                    dist.push([]);
+            }
+            for(var j=0 ; j<matrix[0].length ; j++){
+                if(!dist[i][j]){
+                    dist[i].push(0);
+                }
+                var d = weighted_value_rows(matrix[i],matrix[j],n,m);
+                dist[i][j] = -d;
+            }
+        }
+      
+      var order = reorder.optimal_leaf_order();
+      var row_perm = order.distanceMatrix(dist)(matrix);
+
+      t1.order(row_perm, row_perm);
+      
 }
 
 function weighted_value_rows(r1,r2,cells,m){
