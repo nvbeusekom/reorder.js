@@ -56,7 +56,6 @@ export function dist() {
             }
             for (var i = 0; i < distMatrix.length; i++) {
                 for (var j = 0; j <distMatrix[0].length; j++) {
-                    res[i][j] += distMatrix[i][j];
                     if(square){
                         res[i][j] += distMatrix[i][j] * distMatrix[i][j];
                     }
