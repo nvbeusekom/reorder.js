@@ -171,7 +171,7 @@ export function barycenter(graph, comp, max_iter,timesteps) {
             for (let i = 0; i < layer.length; i++) {
                     v = nodes[layer[i]];
                     if(med[v.index].length>0){
-                        med[v.index] = d3.median(med[v.index]);
+                        med[v.index] = median(med[v.index]);
                     }
                     else{
                         med[v.index] = 0;
