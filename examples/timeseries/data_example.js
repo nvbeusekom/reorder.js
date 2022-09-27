@@ -1,10 +1,14 @@
-var matrices_example = [];
-var col_labels_example = [];
-var row_labels_example = [];
+let matrices_example = [];
+let col_labels_example = [];
+let row_labels_example = [];
 
-var margin = {top: 30, right: 0, bottom: 10, left: 30},
-    width = 800 - margin.left - margin.right,
-    height = 800 - margin.top - margin.bottom;
+/* The example used for the teaser image of:
+ * 
+ * Simultaneous Matrix Orderings for Graph Collections.
+ * Nathan van Beusekom, Wouter Meulemans, and Bettina Speckmann.
+ * IEEE Transactions on Visualization and Computer Graphics, 28(1), pp 1-10, 2021.
+ * https://arxiv.org/abs/2109.12050 
+ */
 function load_example(callback){
 
 matrices_example = [
@@ -47,22 +51,6 @@ matrices_example = [
 //    [0,1,1,0,1,0,0,1],
 //    [1,0,0,1,0,1,1,0]]
 //];
-    var labels = [];
-    for (var i = 0; i < matrices_example[0].length; i++) {
-        labels.push(i);
-    }
-    col_labels_example = labels;
-    row_labels_example = labels;
-    var tables_example = [];
-    for(let i = 0; i<matrices_example.length; i++){
-        var svg = d3.select("#heatmap").append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        var t1 = new table({matrix: matrices_example[i], row_labels_example: labels, col_labels_example: labels},svg);
-        tables_example[i] = t1;
-    }
-    
-    callback(matrices_example, col_labels_example, row_labels_example, tables_example);
+    let loaded_data = load_data(matrices_example);
+    callback(loaded_data[0], loaded_data[1], loaded_data[2], loaded_data[3], loaded_data[4]);
 }

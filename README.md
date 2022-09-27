@@ -1,6 +1,6 @@
 # Simultaneous Matrix Reorderings
-[This repository](https://github.com/nvbeusekom/reorder.js/) is forked from the [Reorder.js](https://github.com/jdfekete/reorder.js/) library to show examples of how existing methods can be adapted to make simultaneous reorderings.
-This code is referenced and used in the paper Simultaneous Matrix Orderings for Graph Collections. Nathan van Beusekom, Wouter Meulemans, Bettina Speckmann (IEEE VIS 2021, to appear).  
+[This branch](https://github.com/nvbeusekom/reorder.js/tree/stable-orderings) is an extension of the simultaneous matrix reordering code, found in the master branch.
+
 
 ## Functionality
 The application allows one to run the ten algorithms described in the paper on several datasets and examples.
@@ -59,6 +59,8 @@ It should open a web browser but if does not, open a web page and connect to: `h
 The library is used by several systems, including [Bertifier](https://www.aviz.fr/bertifier), [The Vistorian](https://vistorian.net/), and [Compadre](https://renecutura.eu/compadre/).
 
 ## Thanks
+
+Thanks to [Nathan van Beusekom @nvbeusekom](https://github.com/nvbeusekom) for the addition of the Moran's I metric, the implementation of simultaneous reordering, and TSP.
 
 Thanks to [Curran Kelleher @curran](https://github.com/curran) for adapting the library to modern JavaScript modules.
 

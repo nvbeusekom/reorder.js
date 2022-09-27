@@ -24,7 +24,6 @@ function matrix(json) {
     node.count = 0;
     matrix[i] = d3.range(n).map(function(j) { return {x: j, y: i, z: 0}; });
   });
-
   // Convert links to matrix; count character occurrences.
   json.links.forEach(function(link) {
     matrix[link.source][link.target].z += link.value;
@@ -102,6 +101,15 @@ function matrix(json) {
 
 	return nodes.map(function(n) { return n.spectral; });
     }
+    
+    function computeNN2OPT() {
+	var order = leafOrder(adjacency);
+
+	order.forEach(function(lo, i) {
+	    nodes[i].leafOrder = lo;
+	});
+	return nodes.map(function(n) { return n.leafOrder; });
+    }
 
   // Precompute the orders.
     var orders = {
@@ -115,7 +123,8 @@ function matrix(json) {
 	leafOrderDist: computeLeaforderDist,
 	barycenter: computeBarycenter,
 	rcm: computeRCM,
-	spectral: computeSpectral
+	spectral: computeSpectral,
+        nn2opt: computeNN2OPT
     };
 
   // The default sort order.
@@ -224,7 +233,12 @@ function matrix(json) {
     }
 
     function distance(value) {
-	leafOrder.distance(reorder.distance[value]);
+        if(value === "morans"){
+            leafOrder.distance(reorder.distance[value](adjacency));
+        }
+        else{
+            leafOrder.distance(reorder.distance[value]);
+        }
 
 	if (currentOrder == 'leafOrder') {
 	    orders.leafOrder = computeLeaforder;
@@ -236,6 +250,11 @@ function matrix(json) {
 	    order("leafOrderDist");
 	    //d3.select("#order").property("selectedIndex", 4);
 	}
+        else if (currentOrder == 'nn2opt') {
+	    orders.nn2opt = computeNN2OPT;
+	    order("nn2opt");
+	    //d3.select("#order").property("selectedIndex", 4);
+	}
 
 	// leafOrder.forEach(function(lo, i) {
 	// 	    nodes[lo].leafOrder = i;
@@ -243,7 +262,6 @@ function matrix(json) {
 	// 	orders.leafOrder = d3.range(n).sort(function(a, b) {
 	// 	    return nodes[b].leafOrder - nodes[a].leafOrder; });
     }
-
     matrix.order = order;
     matrix.distance = distance;
 

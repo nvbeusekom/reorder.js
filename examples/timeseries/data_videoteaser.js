@@ -21,22 +21,6 @@ matrices_videoteaser = [
     [1,0,0],
     [0,0,1]]
 ];
-    var labels = [];
-    for (var i = 0; i < matrices_videoteaser[0].length; i++) {
-        labels.push(i);
-    }
-    col_labels_videoteaser = labels;
-    row_labels_videoteaser = labels;
-    var tables_videoteaser = [];
-    for(let i = 0; i<matrices_videoteaser.length; i++){
-        var svg = d3.select("#heatmap").append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        var t1 = new table({matrix: matrices_videoteaser[i], row_labels_videoteaser: labels, col_labels_videoteaser: labels},svg);
-        tables_videoteaser[i] = t1;
-    }
-    
-    callback(matrices_videoteaser, col_labels_videoteaser, row_labels_videoteaser, tables_videoteaser);
+    let loaded_data = load_data(matrices_videoteaser);
+    callback(loaded_data[0], loaded_data[1], loaded_data[2], loaded_data[3], loaded_data[4]);
 }

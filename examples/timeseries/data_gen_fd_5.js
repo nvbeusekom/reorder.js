@@ -1,13 +1,10 @@
-var matrices_gen = [];
-var col_labels_gen = [];
-var row_labels_gen = [];
+let matrices_gen_fd_5 = [];
+let col_labels_gen_fd_5 = [];
+let row_labels_gen_fd_5 = [];
 
-var margin = {top: 30, right: 0, bottom: 10, left: 30},
-    width = 800 - margin.left - margin.right,
-    height = 800 - margin.top - margin.bottom;
 function load_gen_fd5(callback){
 
-matrices_gen = [
+matrices_gen_fd_5 = [
   [
     [
       1,
@@ -8849,22 +8846,6 @@ matrices_gen = [
     ]
   ]
 ];
-    var labels = [];
-    for (var i = 0; i < matrices_gen[0].length; i++) {
-        labels.push(i);
-    }
-    col_labels_gen = labels;
-    row_labels_gen = labels;
-    var tables_gen = [];
-    for(let i = 0; i<matrices_gen.length; i++){
-        var svg = d3.select("#heatmap").append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        var t1 = new table({matrix: matrices_gen[i], row_labels_example: labels, col_labels_example: labels},svg);
-        tables_gen[i] = t1;
-    }
-    
-    callback(matrices_gen, col_labels_gen, row_labels_gen, tables_gen);
+    let loaded_data = load_data(matrices_gen_fd_5);
+    callback(loaded_data[0], loaded_data[1], loaded_data[2], loaded_data[3], loaded_data[4]);
 }

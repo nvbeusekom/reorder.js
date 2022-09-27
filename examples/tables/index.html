@@ -44,7 +44,11 @@ var matrix = [[1, 0, 0, 0, 1, 0, 0, 0],
     col_labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
       
+<<<<<<< HEAD
 var t1 = new table({matrix: matrix, row_labels: row_labels, col_labels: col_labels},svg);
+=======
+const t1 = new table({matrix: matrix, row_labels: row_labels, col_labels: col_labels},svg);
+>>>>>>> simul_integration
 
 function random_permute() {
       t1.order(reorder.randomPermutation(matrix.length),
