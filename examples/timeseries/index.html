@@ -24,20 +24,12 @@ line {
     <script src="data_example.js"></script>
     <script src="data_example_1.js"></script>
     <script src="data_videoteaser.js"></script>
-    <script src="data_gen_sd_0.js"></script>
     <script src="data_gen_sd_5.js"></script>
-    <script src="data_gen_sd_10.js"></script>
-    <script src="data_gen_fd_0.js"></script>
     <script src="data_gen_fd_5.js"></script>
-    <script src="data_gen_fd_10.js"></script>
-    <script src="data_gen_sj_0.js"></script>
     <script src="data_gen_sj_5.js"></script>
-    <script src="data_gen_sj_10.js"></script>
-    <script src="data_gen_dj_0.js"></script>
-    <script src="data_gen_dj_5.js"></script>
-    <script src="data_gen_dj_10.js"></script>
     <script src="order_functions.js"></script>
     <script src="stable_order_functions.js"></script>
+    <script src="data_generation_code.js"></script>
     <script>
         var tables = [];
         var linksets = [];
@@ -89,16 +81,23 @@ line {
         </div>
         <div style="margin-top:4px;margin-bottom: 4px">
         <button type="button" onclick="print_all(tables)">Print matrices to console</button>
-        <button type="button" onclick="print_links()">Print links to console</button>
+        <button type="button" onclick="print_links(linksets)">Print links to console</button>
         <button type="button" onclick="generate_data(tables)">Generate Data on console</button>
         <div style="margin-top:4px;margin-bottom: 4px">
-        <button type="button" onclick="interpolate_linearly(tables,linksets,'quality')">Interpolate Linearly</button>
-        <button type="button" onclick="interpolate_twoway(tables,linksets,'quality')">Interpolate Two-way</button>
         <button type="button" onclick="optimal_unstable(tables,linksets,'quality')">Unstable Optimal</button>
-        <button type="button" onclick="near_simultaneous_incremental(tables,linksets,'quality')">Near Simultaneous Greedy</button>
+        <!--button type="button" onclick="near_simultaneous_incremental(tables,linksets,'quality')">Near Simultaneous Greedy</button>
         <button type="button" onclick="near_simultaneous_dag(tables,linksets,'quality')">Near Simultaneous DAG</button>
         <button type="button" onclick="greedy_lookahead(tables,linksets,'quality')">Greedy Look-Ahead</button>
-        <button type="button" onclick="greedy_topk(tables,linksets,'quality')">Greedy Diversity</button>
+        <button type="button" onclick="greedy_topk(tables,linksets,'quality')">Greedy Diversity</button-->
+        <button type="button" onclick="greedy_tree_intervals(tables,linksets,'quality')">Tree Intervals</button>
+        <button type="button" onclick="greedy_tree_intervals_slow(tables,linksets,'quality')">Slow Tree Intervals</button>
+        <button type="button" onclick="all_intervals(tables,linksets,'quality')">All Intervals</button>
+        <button type="button" onclick="near_simultaneous_tree_intervals(tables,linksets,'quality')">Near Simultaneous Tree Intervals</button>
+        <button type="button" onclick="near_simultaneous_all_intervals(tables,linksets,'quality')">Near Simultaneous All Intervals</button>
+        </div>
+        <div style="margin-top:4px;margin-bottom: 4px">
+        <button type="button" onclick="run_experiments(tables,linksets,'quality')">Experiments</button>
+        <button type="button" onclick="run_fast_experiments(tables,linksets,'quality')">Fast only Experiments</button>
         </div>
     
     
@@ -254,7 +253,7 @@ function load_data(matrices_data){
             let linkgroup = svg
                 .append("g")
                 .attr("transform", "translate(" + linkoffset + "," + margin.top + ")");
-            const ls = new linkset([new link(1,3,2,4,false)],matrices_data[i].length,linkgroup);
+            const ls = new linkset([],matrices_data[i].length,linkgroup);
             linksets_data[i] = ls;
         }
     }
@@ -284,7 +283,7 @@ function computeQualities(t,str,time){
     document.getElementById(str+"min").innerHTML = "Min<br>BW: " + d3.min(bandwidth) + "<br>PR: " + d3.min(profile) + "<br>LA: " + d3.min(linarr) + "<br>MI: " + d3.min(moran);
     document.getElementById(str+"max").innerHTML = "Max<br>BW: " + d3.max(bandwidth) + "<br>PR: " + d3.max(profile) + "<br>LA: " + d3.max(linarr) + "<br>MI: " + d3.max(moran);
     document.getElementById(str+"med").innerHTML = "Median<br>BW: " + d3.median(bandwidth) + "<br>PR: " + d3.median(profile) + "<br>LA: " + d3.median(linarr) + "<br>MI: " + d3.median(moran);
-    return gen_csv(moran,kdiff);
+    return [moran,kdiff,time];
 }
 
 function gen_csv(moran,kdiff){

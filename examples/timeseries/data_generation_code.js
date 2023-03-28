@@ -1,24 +1,76 @@
+//let cluster_matrix = [
+//    [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+//    [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+//    [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+//    [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+//    [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+//    [1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+//    [0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+//    [0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+//    [0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+//    [0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+//    [0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
+//    [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0],
+//    [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0],
+//    [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0],
+//    [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0],
+//    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0],
+//    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0],
+//    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0],
+//    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
+//    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]
+//];
 let cluster_matrix = [
-    [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]
+    [1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1],
 ];
 
 //generate_data(20);
@@ -29,24 +81,35 @@ function generate_data(t){
     for (let i = 0; i < cluster_matrix.length; i++) {
         init_order.push(i);
     }
-    for (let chance = 0; chance < 0.11; chance+= 0.05) {
-        // ===== Slow drift =====
-        console.log("Slow drift with chance " + chance);
-        let matrices = generate_drifting_matrices(cluster_matrix,t,chance,2,0);
-        console.log(matrices);
-        // ===== Fast drift =====
-        console.log("Fast drift with chance " + chance);
-        matrices = generate_drifting_matrices(cluster_matrix,t,chance,4,0);
-        console.log(matrices);
-        // ===== Single Jump =====
-        console.log("Single jump with chance " + chance);
-        let matrices = generate_drifting_matrices(cluster_matrix,t,chance,2,1);
-        console.log(matrices);
-        // ===== Double Jump =====
-        console.log("Double jump with chance " + chance);
-        matrices = generate_drifting_matrices(cluster_matrix,t,chance,2,2);
-        console.log(matrices);
-    }
+    console.log("Slow drift with chance " + 0.05);
+    let genmatrices = generate_drifting_matrices(cluster_matrix,t,0.05,2,0);
+    console.log(genmatrices);
+    // ===== Fast drift =====
+    console.log("Fast drift with chance " + 0.05);
+    genmatrices = generate_drifting_matrices(cluster_matrix,t,0.05,4,0);
+    console.log(genmatrices);
+    // ===== Single Jump =====
+    console.log("Single jump with chance " + 0.05);
+    genmatrices = generate_drifting_matrices(cluster_matrix,t,0.05,2,1);
+    console.log(genmatrices);
+//    for (let chance = 0; chance < 0.11; chance+= 0.05) {
+//        // ===== Slow drift =====
+//        console.log("Slow drift with chance " + chance);
+//        let matrices = generate_drifting_matrices(cluster_matrix,t,chance,2,0);
+//        console.log(matrices);
+//        // ===== Fast drift =====
+//        console.log("Fast drift with chance " + chance);
+//        matrices = generate_drifting_matrices(cluster_matrix,t,chance,4,0);
+//        console.log(matrices);
+//        // ===== Single Jump =====
+//        console.log("Single jump with chance " + chance);
+//        let matrices = generate_drifting_matrices(cluster_matrix,t,chance,2,1);
+//        console.log(matrices);
+//        // ===== Double Jump =====
+//        console.log("Double jump with chance " + chance);
+//        matrices = generate_drifting_matrices(cluster_matrix,t,chance,2,2);
+//        console.log(matrices);
+//    }
 }
 
 function generate_drifting_matrices(init_matrix,timesteps,chance,drift_speed, jumps){
@@ -173,86 +236,42 @@ function flip_cells(matrix,chance){
 
 // Designed to work with two or four moves...
 function add_greedy_move(order, nr_moves){
+    let choice = Math.random();
+    if(choice > 0.66){ // do connected move
+        let a = random_integer(0,order.length-2);
+        let b = random_integer(0,order.length-2);
+        let top_left = Math.min(a,b);
+        let bot_left = Math.max(a,b)
+        let c = random_integer(bot_left+1,order.length-1);
+        let inv = [Math.random() > 0.5,Math.random() > 0.5];
+        return create_order(order,[[bot_left+1,c],[top_left,bot_left]],inv);
+    }
+    else if(choice > 0.33){
+        let a = random_integer(0,order.length-2);
+        let b = random_integer(0,order.length-2);
+        let top_left = Math.min(a,b);
+        let bot_left = Math.max(a,b);
+        let c = random_integer(bot_left+1,order.length-1);
+        let d = random_integer(bot_left+1,order.length-1);
+        let top_left2 = Math.min(c,d);
+        let bot_left2 = Math.max(c,d);
+        return create_order(order,[[top_left,bot_left],[top_left2,bot_left2]],[true,true]);
+    }
+    else{
+        let a = random_integer(0,order.length-1);
+        let b = random_integer(0,order.length-1);
+        let top_left = Math.min(a,b);
+        let bot_left = Math.max(a,b);
+        let len = bot_left-top_left;
+        if(len > order.length-1-(bot_left+1)){
+            return add_greedy_move(order, nr_moves)
+        }
+        let c = random_integer(bot_left+1,order.length-1-len);
+        let inv = [Math.random() > 0.5,Math.random() > 0.5];
+        return create_order(order,[[c,c+len],[top_left,bot_left]],inv);
+    }
     
-    let a = random_integer(0,order.length-1);
-    let b = random_integer(0,order.length-1);
-    let top_left = Math.min(a,b);
-    let bot_left = Math.max(a,b);
-    let top_right = random_integer(0,(order.length-1)-(bot_left - top_left));
-    let bot_right = top_right + (bot_left - top_left);
-    let link1;
-    if(random_integer(0,1) || top_left === top_right){
-        link1 = new link(top_left,bot_left,top_right,bot_right,true);
-    }
-    else{
-        link1 = new link(top_left,bot_left,top_right,bot_right,false);
-    }
-    if(nr_moves === 2){
-        let res = [];
-        if(random_integer(0,1)){
-            res = do_move_link(order,link1,random_integer(0,1));
-        }
-        else{
-            res = do_swap_link(order,link1,random_integer(0,1));
-        }
-        return res;
-    }
-    // Number moves = 4, do another move
-    let bool = random_integer(0,1);
-    let cross = false;
-    if(bool || Math.max(link1.botleft,link1.botright) === order.length-1){ // Above the previous
-        let border = Math.min(link1.topleft,link1.topright) - 1;
-        a = random_integer(0,border);
-        b = random_integer(0,border);
-        top_left = Math.min(a,b);
-        bot_left = Math.max(a,b);
-        if(random_integer(0,1) && (bot_left - top_left) < (order.length-1)-link1.botright){ // Let it cross the other move
-            top_right = random_integer(Math.max(link1.botleft,link1.botright) + 1,(order.length-1)-(bot_left - top_left));
-            cross = true;
-        }
-        else{ // No cross
-            top_right = random_integer(0,(border)-(bot_left - top_left));
-        }
-    }
-    else{ // Below the previous
-        let border = Math.max(link1.botleft,link1.botright) + 1;
-        a = random_integer(border,order.length-1);
-        b = random_integer(border,order.length-1);
-        top_left = Math.min(a,b);
-        bot_left = Math.max(a,b);
-        top_right = random_integer(border,(order.length-1)-(bot_left - top_left));
-        
-        if(random_integer(0,1) && (bot_left - top_left) < link1.topright){ // Let it cross the other move
-            top_right = random_integer(0,(Math.min(link1.topleft,link1.topright) - 1)-(bot_left - top_left));
-            cross = true;
-        }
-        else{ // No cross
-            top_right = random_integer(border,(order.length-1)-(bot_left - top_left));
-        }
-        
-    }
-    bot_right = top_right + (bot_left - top_left);
-    let link2;
-    if(random_integer(0,1) || top_left === top_right){
-        link2 = new link(top_left,bot_left,top_right,bot_right,true);
-    }
-    else{
-        link2 = new link(top_left,bot_left,top_right,bot_right,false);
-    }
-    let res = [];
-    if(random_integer(0,1)){
-        res = do_move_link(order,link1,random_integer(0,1));
-    }
-    else{
-        res = do_swap_link(order,link1,random_integer(0,1));
-    }
-    if(random_integer(0,1) && !cross){
-        res = do_move_link(res,link2,random_integer(0,1));
-    }
-    else{
-        res = do_swap_link(res,link2,random_integer(0,1));
-    }
-    return res;
+    
     
 }
 

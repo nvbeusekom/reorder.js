@@ -145,7 +145,6 @@ export function hcluster() {
       // keep track of the last added cluster
       root = newCluster;
     }
-
     return root;
   }
 

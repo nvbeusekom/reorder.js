@@ -13,24 +13,6 @@ function getTimestep(){
     document.getElementById("loading").innerHTML = "";
     return timestep;
 }
-function computeQualities(t,time){
-    let output = "";
-    let bandwidth = [];
-    let profile = [];
-    let linarr = [];
-    let moran = [];
-    for(let i = 0; i<t.length; i++){
-        let qualities = t[i].quality();
-        bandwidth.push(qualities[0]);
-        profile.push(qualities[1]);
-        linarr.push(qualities[2]);
-        moran.push(qualities[3]);
-    }
-    document.getElementById("qualitymean").innerHTML = "Mean<br>BW: " + d3.mean(bandwidth) + "<br>PR: " + d3.mean(profile) + "<br>LA: " + d3.mean(linarr)  + "<br>MI: " + d3.mean(moran)   + "<br>Time: " + time;
-    document.getElementById("qualitymin").innerHTML = "Min<br>BW: " + d3.min(bandwidth) + "<br>PR: " + d3.min(profile) + "<br>LA: " + d3.min(linarr) + "<br>MI: " + d3.min(moran);
-    document.getElementById("qualitymax").innerHTML = "Max<br>BW: " + d3.max(bandwidth) + "<br>PR: " + d3.max(profile) + "<br>LA: " + d3.max(linarr) + "<br>MI: " + d3.max(moran);
-    document.getElementById("qualitymed").innerHTML = "Median<br>BW: " + d3.median(bandwidth) + "<br>PR: " + d3.median(profile) + "<br>LA: " + d3.median(linarr) + "<br>MI: " + d3.median(moran);
-}
 
 function initial_order_permute(t) {
     let row_perm = reorder.permutation(matrices[0].length),
@@ -68,7 +50,7 @@ function nn_2opt_gx(t) {
     for(let i = 0; i<t.length; i++){
         t[i].order(row_perm, row_perm);
       }
-    computeQualities(t,time);
+    computeQualities(t,"quality",time);
 }
 
 function union_leaf_order_permute(t,square) {
@@ -89,7 +71,7 @@ function union_leaf_order_permute(t,square) {
     for(let i = 0; i<t.length; i++){
       t[i].order(row_perm, row_perm);
     }
-    computeQualities(t,time);
+    computeQualities(t,"quality",time);
       
 }
 
@@ -111,7 +93,7 @@ function gx_leaf_order_permute(t) {
     let end = new Date().getTime();
     let time = end - start;
 
-    computeQualities(t,time);
+    computeQualities(t,"quality",time);
       
 }
 
@@ -130,7 +112,7 @@ function simultaneous_leaf_order_permute(t) {
     for(let i = 0; i<t.length; i++){
       t[i].order(row_perm, row_perm);
     }
-    computeQualities(t,time);
+    return computeQualities(t,"quality",time);
 }
 
 function gx_barycenter_permute(t) {
@@ -203,7 +185,7 @@ function union_barycenter_permute(t) {
     for(let i = 0; i<t.length; i++){
       t[i].order(row_perm, col_perm);
     }
-    return computeQualities(t,time);
+    return computeQualities(t,"quality",time);
 }
 
 function simultaneous_barycenter_permute(t) {
@@ -245,5 +227,5 @@ function simultaneous_barycenter_permute(t) {
     for(let i = 0; i<t.length; i++){
         t[i].order(row_perm, col_perm);
       }
-    return computeQualities(t,time);
+    return computeQualities(t,"quality",time);
 }
