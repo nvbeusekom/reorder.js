@@ -60,7 +60,7 @@ function run_fast_experiments(t,ls,str){
     console.log(res3);
 }
 
-const nr_moves = 3;
+const nr_moves = 4;
 
 function stepwise_improvement(t,str){
     // Leaf order on the first matrix

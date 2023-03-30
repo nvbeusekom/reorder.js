@@ -111,7 +111,6 @@ export function optimal_leaf_order() {
     let optimal_order = [];
     const left = leaves(v.left);
     const right = leaves(v.right);
-    let debug = true;
     if (debug) {
       console.log(printhcluster(v, 0));
     }

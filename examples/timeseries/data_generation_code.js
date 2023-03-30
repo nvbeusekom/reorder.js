@@ -81,16 +81,16 @@ function generate_data(t){
     for (let i = 0; i < cluster_matrix.length; i++) {
         init_order.push(i);
     }
-    console.log("Slow drift with chance " + 0.0);
-    let genmatrices = generate_drifting_matrices(cluster_matrix,t,0,2,0);
+    console.log("Slow drift with chance " + 0.05);
+    let genmatrices = generate_drifting_matrices(cluster_matrix,t,0.05,2,0);
     console.log(genmatrices);
     // ===== Fast drift =====
     console.log("Fast drift with chance " + 0.05);
-    genmatrices = generate_drifting_matrices(cluster_matrix,t,0,4,0);
+    genmatrices = generate_drifting_matrices(cluster_matrix,t,0.05,4,0);
     console.log(genmatrices);
     // ===== Single Jump =====
     console.log("Single jump with chance " + 0.05);
-    genmatrices = generate_drifting_matrices(cluster_matrix,t,0,2,1);
+    genmatrices = generate_drifting_matrices(cluster_matrix,t,0.05,2,1);
     console.log(genmatrices);
 //    for (let chance = 0; chance < 0.11; chance+= 0.05) {
 //        // ===== Slow drift =====
@@ -146,7 +146,7 @@ function generate_drifting_matrices(init_matrix,timesteps,chance,drift_speed, ju
         }
     }
     if(jumps >= 1){
-        let jump2 = add_greedy_move(add_greedy_move(add_greedy_move(orders[orders.length-1],4),4),4);
+        let jump2 = add_greedy_move(add_greedy_move(add_greedy_move(add_greedy_move(add_greedy_move(add_greedy_move(orders[orders.length-1]))))));
         orders.push(jump2);
         res.push(gen_inverse_from_order(flip_cells(init_matrix,chance),jump2));
         for (let i = 1; i < Math.ceil(timesteps/(jumps+1)); i++) {
