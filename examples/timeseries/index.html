@@ -24,8 +24,11 @@ line {
     <script src="data_example.js"></script>
     <script src="data_example_1.js"></script>
     <script src="data_videoteaser.js"></script>
+    <script src="data_gen_sd_0.js"></script>
     <script src="data_gen_sd_5.js"></script>
+    <script src="data_gen_fd_0.js"></script>
     <script src="data_gen_fd_5.js"></script>
+    <script src="data_gen_sj_0.js"></script>
     <script src="data_gen_sj_5.js"></script>
     <script src="order_functions.js"></script>
     <script src="stable_order_functions.js"></script>
@@ -90,7 +93,7 @@ line {
         <button type="button" onclick="greedy_lookahead(tables,linksets,'quality')">Greedy Look-Ahead</button>
         <button type="button" onclick="greedy_topk(tables,linksets,'quality')">Greedy Diversity</button-->
         <button type="button" onclick="greedy_tree_intervals(tables,linksets,'quality')">Tree Intervals</button>
-        <button type="button" onclick="greedy_tree_intervals_slow(tables,linksets,'quality')">Slow Tree Intervals</button>
+        <button type="button" onclick="vis_split_up(tables,linksets,'quality')">VIS Split Tree Intervals</button>
         <button type="button" onclick="all_intervals(tables,linksets,'quality')">All Intervals</button>
         <button type="button" onclick="near_simultaneous_tree_intervals(tables,linksets,'quality')">Near Simultaneous Tree Intervals</button>
         <button type="button" onclick="near_simultaneous_all_intervals(tables,linksets,'quality')">Near Simultaneous All Intervals</button>

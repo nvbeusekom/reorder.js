@@ -13,19 +13,19 @@ function run_experiments(t,ls,str){
     let tree_simul = near_simultaneous_tree_intervals(t,ls,str);
     console.log(tree_simul);
     console.log("Morans I")
-    let res = "IL\tSL\tAI\tTI\tAI NS\tTI NS\n";
+    let res = "IL\tSL\tCI\tTI\tCINS\tTINS\n";
     for (var i = 0; i < t.length; i++) {
         res += unstable[0][i] + "\t" + simul[0][i] + "\t" + all_greedy[0][i] + "\t" + tree_greedy[0][i] + "\t" + all_simul[0][i] + "\t" + tree_simul[0][i] +"\n";
     }
     console.log(res);
     console.log("Change")
-    let res2 = "IL\tSL\tAI\tTI\tAI NS\tTI NS\n";
+    let res2 = "IL\tSL\tCI\tTI\tCINS\tTINS\n";
     for (var i = 0; i < t.length-1; i++) {
         res2 += unstable[1][i] + "\t" + simul[1][i] + "\t" + all_greedy[1][i] + "\t" + tree_greedy[1][i] + "\t" + all_simul[1][i] + "\t" + tree_simul[1][i] +"\n";
     }
     console.log(res2);
     console.log("Time")
-    let res3 = "IL\tSL\tAI\tTI\tAI NS\tTI NS\n";
+    let res3 = "IL\tSL\tCI\tTI\tCINS\tTINS\n";
     res3 += unstable[2] + "\t" + simul[2] + "\t" + all_greedy[2] + "\t" + tree_greedy[2] + "\t" + all_simul[2] + "\t" + tree_simul[2] +"\n";
     
     console.log(res3);
@@ -42,19 +42,19 @@ function run_fast_experiments(t,ls,str){
     let tree_simul = near_simultaneous_tree_intervals(t,ls,str);
     console.log(tree_simul);
     console.log("Morans I")
-    let res = "IL\tSL\tTI\tTI NS\n";
+    let res = "IL\tSL\tTI\tTINS\n";
     for (var i = 0; i < t.length; i++) {
         res += unstable[0][i] + "\t" + simul[0][i] + "\t" + tree_greedy[0][i] + "\t" + tree_simul[0][i] +"\n";
     }
     console.log(res);
     console.log("Change")
-    let res2 = "IL\tSL\tTI\tTI NS\n";
+    let res2 = "IL\tSL\tTI\tTINS\n";
     for (var i = 0; i < t.length-1; i++) {
         res2 += unstable[1][i] + "\t" + simul[1][i] + "\t" + tree_greedy[1][i] + "\t" + tree_simul[1][i] +"\n";
     }
     console.log(res2);
     console.log("Time")
-    let res3 = "IL\tSL\tTI\tTI NS\n";
+    let res3 = "IL\tSL\tTI\tTINS\n";
     res3 += unstable[2] + "\t" + simul[2] + "\t" + tree_greedy[2] + "\t" + tree_simul[2] +"\n";
     
     console.log(res3);
@@ -483,9 +483,9 @@ function choose_k_intervals(array,count,k, input, callback){
     else {
         let best = [Number.NEGATIVE_INFINITY,[],[]];
         for (var i = count; i < input.length; i++) {
-            if(array.length === 0 && i>0 && input[i][0] > input[i-1][0]){
-                console.log(input[i][0]);
-            }
+//            if(array.length === 0 && i>0 && input[i][0] > input[i-1][0]){
+//                console.log(input[i][0]);
+//            }
             if(array.length === 0 || !overlapping_intervals([array[array.length-1],input[i]])){
                 let res = choose_k_intervals([...array,input[i]], i+1,k, input, callback);
                 if(res[0] > best[0]){
@@ -512,7 +512,7 @@ function reshuffle_intervals(timestep, tuples, order, check_with_simul, simul_or
     for (let i = 0; i < permutations.length; i++) {
         let perm = permutations[i];
         // Check if the permuted intervals fit the input intervals
-        if(feasible_permutation(tuples,perm)){
+        if(evaluate_interval_permutation(timestep, inversals[0], order, tuples, perm) !== -1){
             // If so, apply all combinations of inversals
             for (let j = 0; j < inversals.length; j++) {
                 let inv = inversals[j];
@@ -645,8 +645,71 @@ function overlapping_intervals(intervals){
     return false;
 }
 
+function get_split_intervals(timestep, prev_order){
+    let dist = reorder.dist();
+    dist.distance(getDistance(matrices[timestep]));
+    let dist_rows = dist(matrices[timestep]);
+    for (let i = 0; i < prev_order.length; i++) {
+        let index = prev_order[i];
+        for (let j = 0; j < dist_rows[0].length; j++) {
+            if(i === 0 && j !== prev_order[i+1]){
+                dist_rows[index][j] = Infinity; 
+            }
+            else if(i === prev_order.length - 1 && j !== prev_order[i-1]){
+                dist_rows[index][j] = Infinity; 
+            }
+            else if(j !== prev_order[i-1] && j !== prev_order[i+1]){
+                dist_rows[index][j] = Infinity;  
+            }
+        }
+    }
+    let hierarchical_tree = reorder.hcluster().linkage("single").distance(getDistance(matrices[timestep])).distanceMatrix(dist_rows)(matrices[timestep]);
+    let intervals1 = tree_to_intervals(hierarchical_tree.left,prev_order);
+    let intervals2 = tree_to_intervals(hierarchical_tree.right,prev_order);
+    return [intervals1,intervals2];
+}
+
+function vis_split_up(t,ls,str){
+    console.log("VIS split tree intervals");
+    let start = new Date().getTime();
+    let firstorder = lo_get_order(t,0);
+    let orders = [];
+    orders.push(firstorder);
+    for (let timestep = 1; timestep < t.length; timestep++) {
+        console.log("Doing " + timestep);
+        let order = orders[timestep-1];
+
+        let intervals = get_split_intervals(timestep,order);
+        
+        let res = choose_k_intervals([],0,nr_moves, intervals[0], (x)=>reshuffle_intervals(timestep, x, order, false, [], nr_moves));
+        let best_permutation = res[1];
+        let best_inversion = res[2];
+        let bestorder = create_order(order,best_permutation,best_inversion);
+        
+        let res2 = choose_k_intervals([],0,nr_moves, intervals[1], (x)=>reshuffle_intervals(timestep, x, bestorder, false, [], nr_moves));
+        let best_permutation2 = res2[1];
+        let best_inversion2 = res2[2];
+        let bestorder2 = create_order(bestorder,best_permutation2,best_inversion2);
+//        console.log("Time: " + (new Date().getTime() - start));
+        orders.push(bestorder2);
+    }
+    let end = new Date().getTime();
+    let time = end - start;
+    console.log("Time: " + time);
+    link_transitions = [];
+    for (let i = 0; i < t.length; i++) {
+        t[i].order(orders[i], orders[i]);
+        if(i > 0){
+            ls[i-1].update_links(minLinks(orders[i-1],orders[i]));
+            link_transitions.push(minLinks(orders[i-1],orders[i]));
+        }
+    }
+    return computeQualities(t,str,time);
+}
+
 // Takes left intervals, right intervals
 function feasible_permutation(input_tuples, permutation){
+    console.error("Don't use this function its not reliable");
     let left_surplus = 0;
     let right_surplus = 0;
     let left_i = 0;

@@ -81,16 +81,16 @@ function generate_data(t){
     for (let i = 0; i < cluster_matrix.length; i++) {
         init_order.push(i);
     }
-    console.log("Slow drift with chance " + 0.05);
-    let genmatrices = generate_drifting_matrices(cluster_matrix,t,0.05,2,0);
+    console.log("Slow drift with chance " + 0.0);
+    let genmatrices = generate_drifting_matrices(cluster_matrix,t,0,2,0);
     console.log(genmatrices);
     // ===== Fast drift =====
     console.log("Fast drift with chance " + 0.05);
-    genmatrices = generate_drifting_matrices(cluster_matrix,t,0.05,4,0);
+    genmatrices = generate_drifting_matrices(cluster_matrix,t,0,4,0);
     console.log(genmatrices);
     // ===== Single Jump =====
     console.log("Single jump with chance " + 0.05);
-    genmatrices = generate_drifting_matrices(cluster_matrix,t,0.05,2,1);
+    genmatrices = generate_drifting_matrices(cluster_matrix,t,0,2,1);
     console.log(genmatrices);
 //    for (let chance = 0; chance < 0.11; chance+= 0.05) {
 //        // ===== Slow drift =====
@@ -122,11 +122,14 @@ function generate_drifting_matrices(init_matrix,timesteps,chance,drift_speed, ju
     }
     orders.push(init_order);
     for (let i = 1; i < Math.floor(timesteps/(jumps+1)); i++) {
-        let neworder = greedy_drifting_order(orders[orders.length-1],init_matrix.length,drift_speed);
+        let neworder = greedy_drifting_order(orders[orders.length-1],init_matrix.length);
+        if(drift_speed === 4){
+            neworder = greedy_drifting_order(neworder,init_matrix.length);
+        }
         let matrix = gen_inverse_from_order(flip_cells(init_matrix,chance),neworder);
         res.push(matrix);
 //        console.log(matrix_to_string(reshuffle(matrix,neworder)));
-//        console.log(minLinks(orders[orders.length-1],neworder).length);
+        console.log(minLinks(orders[orders.length-1],neworder).length);
         orders.push(neworder);
     }
     if(jumps === 2){
@@ -174,10 +177,10 @@ function matrix_to_string(m){
     return str;
 }
 
-function greedy_drifting_order(init,n,drift_speed){
-    let order = add_greedy_move(init,drift_speed);
-    while(minLinks(init,order) < drift_speed - 1 || order.length !== n){
-        order = add_greedy_move(init,drift_speed);
+function greedy_drifting_order(init,n){
+    let order = add_greedy_move(init);
+    while(order.length !== n){
+        order = add_greedy_move(init);
     }
     return order;
 }
@@ -235,7 +238,7 @@ function flip_cells(matrix,chance){
 
 
 // Designed to work with two or four moves...
-function add_greedy_move(order, nr_moves){
+function add_greedy_move(order){
     let choice = Math.random();
     if(choice > 0.66){ // do connected move
         let a = random_integer(0,order.length-2);
@@ -264,7 +267,7 @@ function add_greedy_move(order, nr_moves){
         let bot_left = Math.max(a,b);
         let len = bot_left-top_left;
         if(len > order.length-1-(bot_left+1)){
-            return add_greedy_move(order, nr_moves)
+            return add_greedy_move(order);
         }
         let c = random_integer(bot_left+1,order.length-1-len);
         let inv = [Math.random() > 0.5,Math.random() > 0.5];

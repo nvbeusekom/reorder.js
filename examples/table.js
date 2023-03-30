@@ -30,18 +30,18 @@ class table{
 	this.col_perm = reorder.permutation(this.m);
     this.col_inv = reorder.inverse_permutation(this.col_perm);
     
-    var colorLow = 'white', colorHigh = 'black', colorGrid = 'grey';
-    var max_value = d3.max(this.matrix.map(function(row) { return d3.max(row); })),
-	color = d3.scale.linear()
-	    .range([colorLow, colorHigh])
-	    .domain([0, max_value]);
-
-    var gridSize = Math.min(width / this.matrix.length, height / this.matrix[0].length);
-	this.h = gridSize;
-	this.th = this.h*this.n;
-	this.w = gridSize;
-	this.tw = this.w*this.m;
-
+//    var colorLow = 'white', colorHigh = 'black', colorGrid = 'grey';
+//    var max_value = d3.max(this.matrix.map(function(row) { return d3.max(row); })),
+//	color = d3.scale.linear()
+//	    .range([colorLow, colorHigh])
+//	    .domain([0, max_value]);
+//
+//    var gridSize = Math.min(width / this.matrix.length, height / this.matrix[0].length);
+//	this.h = gridSize;
+//	this.th = this.h*this.n;
+//	this.w = gridSize;
+//	this.tw = this.w*this.m;
+//
 //    var h = this.h;
 //    var row_inv = this.row_inv;
 //    var row = this.svg
