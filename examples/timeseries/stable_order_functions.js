@@ -60,7 +60,7 @@ function run_fast_experiments(t,ls,str){
     console.log(res3);
 }
 
-const nr_moves = 4;
+const nr_moves = 2;
 
 function stepwise_improvement(t,str){
     // Leaf order on the first matrix
@@ -115,13 +115,7 @@ function optimal_unstable(t,ls,str){
       let l = [];
       let start = new Date().getTime();
       for(let i = 0; i<t.length; i++){
-        console.log("Doing: " + i);
-        let transpose = reorder.transpose(matrices[i]);
-        let dist_rows = reorder.dist()(matrices[i]),
-        dist_cols = reorder.dist()(transpose),
-        order = reorder.optimal_leaf_order(),
-        row_perm = order.distanceMatrix(dist_rows)(matrices[i]),
-        col_perm = order.distanceMatrix(dist_cols)(transpose);
+        let row_perm = lo_get_order(t,i);
         t[i].order(row_perm, row_perm);
         if(i > 0){
             ls[i-1].update_links(minLinks(o1,row_perm));

@@ -22,7 +22,7 @@ import { dist } from './dist';
 export function optimal_leaf_order() {
   let distanceMatrix = null;
   let distance = distances.euclidean;
-  let linkage = 'complete';
+  let linkage = 'single';
   let leavesMap = {};
   let orderMap = {};
 
