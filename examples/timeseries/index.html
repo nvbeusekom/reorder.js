@@ -99,7 +99,7 @@ line {
         <button type="button" onclick="near_simultaneous_all_intervals(tables,linksets,'quality')">Near Simultaneous All Intervals</button>
         </div>
         <div style="margin-top:4px;margin-bottom: 4px">
-        <button type="button" onclick="run_experiments(tables,linksets,'quality')">Experiments</button>
+        <button type="button" onclick="run_all_experiments(tables,linksets,'quality')">Experiments</button>
         <button type="button" onclick="run_fast_experiments(tables,linksets,'quality')">Fast only Experiments</button>
         </div>
     
@@ -286,6 +286,10 @@ function computeQualities(t,str,time){
     document.getElementById(str+"min").innerHTML = "Min<br>BW: " + d3.min(bandwidth) + "<br>PR: " + d3.min(profile) + "<br>LA: " + d3.min(linarr) + "<br>MI: " + d3.min(moran);
     document.getElementById(str+"max").innerHTML = "Max<br>BW: " + d3.max(bandwidth) + "<br>PR: " + d3.max(profile) + "<br>LA: " + d3.max(linarr) + "<br>MI: " + d3.max(moran);
     document.getElementById(str+"med").innerHTML = "Median<br>BW: " + d3.median(bandwidth) + "<br>PR: " + d3.median(profile) + "<br>LA: " + d3.median(linarr) + "<br>MI: " + d3.median(moran);
+//    console.log("MI, Change, Time");
+//    console.log(moran);
+//    console.log(kdiff);
+//    console.log(time);
     return [moran,kdiff,time];
 }
 
@@ -302,7 +306,7 @@ function gen_csv(moran,kdiff){
 }
 
 
-function run_all_experiments(t){
+function run_all_experiments(t,ls,str){
     var obj = {};
     var header = "algorithm";
     for (var i = 0; i < t.length; i++) {
@@ -311,108 +315,54 @@ function run_all_experiments(t){
     header += "\n";
     var mires = header;
     var kdiffres = header;
+
     
-    lo_mi_all(t,'quality');
-    var stats = computeQualities(t,'quality',0);
-    mires += "O," + stats[0];
-    kdiffres += "O," + stats[1];
 
+    let matrices = "";
+    let links = "";
+    let unstable = optimal_unstable(t,ls,str);
     matrices = print_all(t);
-    links = print_links(link_transitions);
-    obj["Morans I-based Leaf Order"] = {};
-    obj["Morans I-based Leaf Order"]["matrices"] = matrices;
-    obj["Morans I-based Leaf Order"]["links"] = links;
-
-//    max_mi_all(t,'quality');
-//    stats = computeQualities(t,'quality',0);
-//    mires += "NN-2OPT All," + stats[0];
-//    kdiffres += "NN-2OPT All," + stats[1];
-//
+    links = print_links(ls);
+    obj["IL"] = {};
+    obj["IL"]["matrices"] = matrices;
+    obj["IL"]["links"] = links;
+    let simul = simultaneous_leaf_order_permute(t);
+    matrices = print_all(t);
+    links = print_links(ls);
+    obj["SL"] = {};
+    obj["SL"]["matrices"] = matrices;
+    obj["SL"]["links"] = links;
+//    let all_greedy = all_intervals(t,ls,str);
 //    matrices = print_all(t);
-//    links = printLinks(link_transitions);
-//    obj["NN-2OPT All"] = {};
-//    obj["NN-2OPT All"]["matrices"] = matrices;
-//    obj["NN-2OPT All"]["links"] = links;
-    
-    greedy_lookahead(t,'quality');
-    stats = computeQualities(t,'quality',0);
-    mires += "LG," + stats[0];
-    kdiffres += "LG," + stats[1];
-
+//    links = print_links(ls);
+    matrices = "";
+    links = "";
+    obj["CI"] = {};
+    obj["CI"]["matrices"] = matrices;
+    obj["CI"]["links"] = links;
+    let tree_greedy = greedy_tree_intervals(t,ls,str);
     matrices = print_all(t);
-    links = print_links(link_transitions);
-    obj["Lookahead Greedy"] = {};
-    obj["Lookahead Greedy"]["matrices"] = matrices;
-    obj["Lookahead Greedy"]["links"] = links;
-    
-    greedy_topk(t,'quality');
-    stats = computeQualities(t,'quality',0);
-    mires += "DG," + stats[0];
-    kdiffres += "DG," + stats[1];
-
+    links = print_links(ls);
+    obj["TI"] = {};
+    obj["TI"]["matrices"] = matrices;
+    obj["TI"]["links"] = links;
+//    let all_simul = near_simultaneous_all_intervals(t,ls,str);
+//    matrices = print_all(t);
+//    links = print_links(ls);
+    matrices = "";
+    links = "";
+    obj["CINS"] = {};
+    obj["CINS"]["matrices"] = matrices;
+    obj["CINS"]["links"] = links;
+    let tree_simul = near_simultaneous_tree_intervals(t,ls,str);
     matrices = print_all(t);
-    links = print_links(link_transitions);
-    obj["Diverse Greedy"] = {};
-    obj["Diverse Greedy"]["matrices"] = matrices;
-    obj["Diverse Greedy"]["links"] = links;
-    
-    near_simultaneous_incremental(t,'quality');
-    stats = computeQualities(t,'quality',0);
-    mires += "GS+," + stats[0];
-    kdiffres += "GS+," + stats[1];
+    links = print_links(ls);
+    obj["TINS"] = {};
+    obj["TINS"]["matrices"] = matrices;
+    obj["TINS"]["links"] = links;
 
-    matrices = print_all(t);
-    links = print_links(link_transitions);
-    obj["Greedy Simultaneous"] = {};
-    obj["Greedy Simultaneous"]["matrices"] = matrices;
-    obj["Greedy Simultaneous"]["links"] = links;
-    
-    near_simultaneous_dag(t,'quality');
-    stats = computeQualities(t,'quality',0);
-    mires += "OS+," + stats[0];
-    kdiffres += "OS+," + stats[1];
-
-    matrices = print_all(t);
-    links = print_links(link_transitions);
-    obj["Optimal Simultaneous"] = {};
-    obj["Optimal Simultaneous"]["matrices"] = matrices;
-    obj["Optimal Simultaneous"]["links"] = links;
-    
-    interpolate_linearly(t,'quality');
-    stats = computeQualities(t,'quality',0);
-    mires += "LI," + stats[0];
-    kdiffres += "LI," + stats[1];
-
-    matrices = print_all(t);
-    links = print_links(link_transitions);
-    obj["Linear Interpolation"] = {};
-    obj["Linear Interpolation"]["matrices"] = matrices;
-    obj["Linear Interpolation"]["links"] = links;
-    
-    interpolate_twoway(t,'quality');
-    stats = computeQualities(t,'quality',0);
-    mires += "BI," + stats[0];
-    kdiffres += "BI," + stats[1];
-
-    matrices = print_all(t);
-    links = print_links(link_transitions);
-    obj["Bidirectional Interpolation"] = {};
-    obj["Bidirectional Interpolation"]["matrices"] = matrices;
-    obj["Bidirectional Interpolation"]["links"] = links;
-    
-    simultaneous_morans_leaf_order_permute(t,'quality',false,true);
-    stats = computeQualities(t,'quality',0);
-    mires += "S," + stats[0];
-    kdiffres += "S," + stats[1];
-
-    var matrices = print_all(t);
-    var links = print_links(link_transitions);
-    obj["Simultaneous with Morans I-based LO"] = {};
-    obj["Simultaneous with Morans I-based LO"]["matrices"] = matrices;
-    obj["Simultaneous with Morans I-based LO"]["links"] = links;
-
-    console.log(mires);
-    console.log(kdiffres);
+//    console.log(mires);
+//    console.log(kdiffres);
     console.log(obj);
 }
 

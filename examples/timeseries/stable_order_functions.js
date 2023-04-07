@@ -1,34 +1,47 @@
 function run_experiments(t,ls,str){
     // Just run all the things, print the mi values in the right formats
     let unstable = optimal_unstable(t,ls,str);
-    console.log(unstable);
+    console.log("IL")
+    print_all(t);
+    print_links(t);
     let simul = simultaneous_leaf_order_permute(t);
-    console.log(simul);
+    console.log("SL")
+    print_all(t);
+    print_links(t);
     let all_greedy = all_intervals(t,ls,str);
-    console.log(all_greedy);
+    console.log("CI")
+    print_all(t);
+    print_links(t);
     let tree_greedy = greedy_tree_intervals(t,ls,str);
-    console.log(tree_greedy);
+    console.log("TI")
+    print_all(t);
+    print_links(t);
     let all_simul = near_simultaneous_all_intervals(t,ls,str);
-    console.log(all_simul);
+    console.log("CINS")
+    print_all(t);
+    print_links(t);
     let tree_simul = near_simultaneous_tree_intervals(t,ls,str);
-    console.log(tree_simul);
-    console.log("Morans I")
-    let res = "IL\tSL\tCI\tTI\tCINS\tTINS\n";
-    for (var i = 0; i < t.length; i++) {
-        res += unstable[0][i] + "\t" + simul[0][i] + "\t" + all_greedy[0][i] + "\t" + tree_greedy[0][i] + "\t" + all_simul[0][i] + "\t" + tree_simul[0][i] +"\n";
-    }
-    console.log(res);
-    console.log("Change")
-    let res2 = "IL\tSL\tCI\tTI\tCINS\tTINS\n";
-    for (var i = 0; i < t.length-1; i++) {
-        res2 += unstable[1][i] + "\t" + simul[1][i] + "\t" + all_greedy[1][i] + "\t" + tree_greedy[1][i] + "\t" + all_simul[1][i] + "\t" + tree_simul[1][i] +"\n";
-    }
-    console.log(res2);
-    console.log("Time")
-    let res3 = "IL\tSL\tCI\tTI\tCINS\tTINS\n";
-    res3 += unstable[2] + "\t" + simul[2] + "\t" + all_greedy[2] + "\t" + tree_greedy[2] + "\t" + all_simul[2] + "\t" + tree_simul[2] +"\n";
-    
-    console.log(res3);
+    console.log("TINS")
+    print_all(t);
+    print_links(t);
+//    console.log(tree_simul);
+//    console.log("Morans I")
+//    let res = "IL\tSL\tCI\tTI\tCINS\tTINS\n";
+//    for (var i = 0; i < t.length; i++) {
+//        res += unstable[0][i] + "\t" + simul[0][i] + "\t" + all_greedy[0][i] + "\t" + tree_greedy[0][i] + "\t" + all_simul[0][i] + "\t" + tree_simul[0][i] +"\n";
+//    }
+//    console.log(res);
+//    console.log("Change")
+//    let res2 = "IL\tSL\tCI\tTI\tCINS\tTINS\n";
+//    for (var i = 0; i < t.length-1; i++) {
+//        res2 += unstable[1][i] + "\t" + simul[1][i] + "\t" + all_greedy[1][i] + "\t" + tree_greedy[1][i] + "\t" + all_simul[1][i] + "\t" + tree_simul[1][i] +"\n";
+//    }
+//    console.log(res2);
+//    console.log("Time")
+//    let res3 = "IL\tSL\tCI\tTI\tCINS\tTINS\n";
+//    res3 += unstable[2] + "\t" + simul[2] + "\t" + all_greedy[2] + "\t" + tree_greedy[2] + "\t" + all_simul[2] + "\t" + tree_simul[2] +"\n";
+//    
+//    console.log(res3);
 }
 
 function run_fast_experiments(t,ls,str){
@@ -60,7 +73,7 @@ function run_fast_experiments(t,ls,str){
     console.log(res3);
 }
 
-const nr_moves = 2;
+const nr_moves = 4;
 
 function stepwise_improvement(t,str){
     // Leaf order on the first matrix

@@ -1,0 +1,11 @@
+Dearest reviewer,
+
+If you are reading this, then you have reached this page before I have converted all of our results to images.
+(For our paper, I have computed results and metrics without rendering).
+
+My apologies for this.
+
+I will try to have these results in here by next Monday.
+
+Kind regards,
+Nathan
