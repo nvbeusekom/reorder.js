@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Heatmap</title>
+    <style>
+body {
+  font: 10px sans-serif;
+}
+line {
+  stroke: #000;
+}
+    </style>
+    <script src="/d3.v3.js"></script>
+    <script src="/reorder.js"></script>
+    <script src="/table.js"></script>
+  </head>
+  <body>
+    <button type="button" onclick="random_permute()">Random Permute</button>
+    <button type="button" onclick="optimal_leaf_order_permute()">Optimal Leaf Order Permute</button>
+    <button type="button" onclick="nn_2opt()">NN 2OPT</button>
+    <button type="button" onclick="initial_order_permute()">Initial Order</button>
+    <div id='heatmap'></div>
+<script>
+
+var margin = {top: 80, right: 0, bottom: 10, left: 80},
+    width = 720 - margin.left - margin.right,
+    height = 720 - margin.top - margin.bottom;
+
+    svg = d3.select("#heatmap").append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	    .append("g")
+	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+let dmatrix = [];
+
+
+
+d3.csv("cell_12_dist.csv", function(err,data) {
+    let str = "";
+    for (var i = 0; i <= data.length; i++) {
+        str += i;
+        if(i < data.length){
+            str += ",";
+        }
+    }
+    for (let i = 0; i < data.length; i++) {
+        let row = [];
+        for (let j = 0; j < data.length; j++) {
+            row.push(Number(data[i][j]));
+        }
+        dmatrix.push(row);
+    }
+});
+    
+//var t1 = new table({matrix: matrix, row_labels: row_labels, col_labels: col_labels},svg);
+
+function random_permute() {
+      console.log(reorder.randomPermutation(dmatrix.length));
+}
+
+function optimal_leaf_order_permute() {
+    let
+      order = reorder.optimal_leaf_order(),
+      row_perm = order.distanceMatrix(dmatrix)(dmatrix);
+      console.log(row_perm);
+}
+
+function nn_2opt() {
+    let
+      order = reorder.nn_2opt(),
+      row_perm = order.distanceMatrix(dmatrix)(dmatrix);
+      console.log(row_perm);
+}
+
+function initial_order_permute() {
+      t1.order(reorder.permutation(dmatrix.length),
+		  reorder.permutation(dmatrix[0].length));
+}
+      
+    </script>
+  </body>
+</html>
+
