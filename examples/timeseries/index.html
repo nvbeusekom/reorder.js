@@ -99,8 +99,11 @@ line {
         <button type="button" onclick="near_simultaneous_all_intervals(tables,linksets,'quality')">Near Simultaneous All Intervals</button>
         </div>
         <div style="margin-top:4px;margin-bottom: 4px">
-        <button type="button" onclick="run_all_experiments(tables,linksets,'quality')">Experiments</button>
+        <button type="button" onclick="run_experiments(tables,linksets,'quality')">Experiments</button>
+        <button type="button" onclick="get_delta_moves(tables,linksets,'quality')">Delta</button>
+        <button type="button" onclick="gradual_improve(tables,linksets,'quality')">Generate Contextual Orderings (Number of changes / keyframes in code, results in console)</button>
         <button type="button" onclick="run_fast_experiments(tables,linksets,'quality')">Fast only Experiments</button>
+        <button type="button" onclick="nPer50(tables,linksets,'quality')">2/50</button>
         </div>
     
     
@@ -290,6 +293,7 @@ function computeQualities(t,str,time){
 //    console.log(moran);
 //    console.log(kdiff);
 //    console.log(time);
+    console.log(moran);
     return [moran,kdiff,time];
 }
 

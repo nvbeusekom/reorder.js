@@ -1,36 +1,36 @@
-function run_experiments(t,ls,str){
+function run_experiments1(t,ls,str){
     // Just run all the things, print the mi values in the right formats
     let unstable = optimal_unstable(t,ls,str);
     console.log("IL")
-    print_all(t);
-    print_links(t);
+//    print_all(t);
+//    print_links(t);
     let simul = simultaneous_leaf_order_permute(t);
     console.log("SL")
-    print_all(t);
-    print_links(t);
+//    print_all(t);
+//    print_links(t);
     let all_greedy = all_intervals(t,ls,str);
     console.log("CI")
-    print_all(t);
-    print_links(t);
+//    print_all(t);
+//    print_links(t);
     let tree_greedy = greedy_tree_intervals(t,ls,str);
     console.log("TI")
-    print_all(t);
-    print_links(t);
+//    print_all(t);
+//    print_links(t);
     let all_simul = near_simultaneous_all_intervals(t,ls,str);
     console.log("CINS")
-    print_all(t);
-    print_links(t);
+//    print_all(t);
+//    print_links(t);
     let tree_simul = near_simultaneous_tree_intervals(t,ls,str);
     console.log("TINS")
-    print_all(t);
-    print_links(t);
+//    print_all(t);
+//    print_links(t);
 //    console.log(tree_simul);
-//    console.log("Morans I")
-//    let res = "IL\tSL\tCI\tTI\tCINS\tTINS\n";
-//    for (var i = 0; i < t.length; i++) {
-//        res += unstable[0][i] + "\t" + simul[0][i] + "\t" + all_greedy[0][i] + "\t" + tree_greedy[0][i] + "\t" + all_simul[0][i] + "\t" + tree_simul[0][i] +"\n";
-//    }
-//    console.log(res);
+    console.log("Morans I")
+    let res = "IL\tSL\tCI\tTI\tCINS\tTINS\n";
+    for (var i = 0; i < t.length; i++) {
+        res += unstable[0][i] + "\t" + simul[0][i] + "\t" + all_greedy[0][i] + "\t" + tree_greedy[0][i] + "\t" + all_simul[0][i] + "\t" + tree_simul[0][i] +"\n";
+    }
+    console.log(res);
 //    console.log("Change")
 //    let res2 = "IL\tSL\tCI\tTI\tCINS\tTINS\n";
 //    for (var i = 0; i < t.length-1; i++) {
@@ -42,6 +42,281 @@ function run_experiments(t,ls,str){
 //    res3 += unstable[2] + "\t" + simul[2] + "\t" + all_greedy[2] + "\t" + tree_greedy[2] + "\t" + all_simul[2] + "\t" + tree_simul[2] +"\n";
 //    
 //    console.log(res3);
+}
+
+function run_experiments(t,ls,str){
+    // Just run all the things, print the mi values in the right formats
+    let unstable = optimal_unstable(t,ls,str);
+    console.log("IL")
+//    print_all(t);
+//    print_links(t);
+    let simul = simultaneous_leaf_order_permute(t);
+    console.log("SL")
+//    print_all(t);
+//    print_links(t);
+    let all_greedy = all_intervals(t,ls,str);
+    console.log("CI")
+//    print_all(t);
+//    print_links(t);
+//    let tree_greedy = greedy_tree_intervals(t,ls,str);
+//    console.log("TI")
+//    print_all(t);
+//    print_links(t);
+    let all_simul = near_simultaneous_all_intervals(t,ls,str);
+    console.log("CINS")
+//    print_all(t);
+//    print_links(t);
+//    let tree_simul = near_simultaneous_tree_intervals(t,ls,str);
+//    console.log("TINS")
+//    print_all(t);
+//    print_links(t);
+//    console.log(tree_simul);
+    console.log("Morans I")
+    let res = "IL\tSL\tCI\tNS\n";
+    for (var i = 0; i < t.length; i++) {
+        res += unstable[0][i] + "\t" + simul[0][i] + "\t" + all_greedy[0][i] + "\t" + all_simul[0][i] + "\n";
+    }
+    console.log(res);
+//    console.log("Change")
+//    let res2 = "IL\tSL\tCI\tTI\tCINS\tTINS\n";
+//    for (var i = 0; i < t.length-1; i++) {
+//        res2 += unstable[1][i] + "\t" + simul[1][i] + "\t" + all_greedy[1][i] + "\t" + tree_greedy[1][i] + "\t" + all_simul[1][i] + "\t" + tree_simul[1][i] +"\n";
+//    }
+//    console.log(res2);
+//    console.log("Time")
+//    let res3 = "IL\tSL\tCI\tTI\tCINS\tTINS\n";
+//    res3 += unstable[2] + "\t" + simul[2] + "\t" + all_greedy[2] + "\t" + tree_greedy[2] + "\t" + all_simul[2] + "\t" + tree_simul[2] +"\n";
+//    
+//    console.log(res3);
+}
+
+
+function get_delta_moves(t,ls,str){
+    let unstable = optimal_unstable(t,ls,str);
+    let opt_orders = [];
+    for (var i = 0; i < t.length; i++) {
+        opt_orders.push(t[i].row_perm);
+    }
+    let simul = simultaneous_leaf_order_permute(t);
+    let simul_orders = [];
+    for (var i = 0; i < t.length; i++) {
+        simul_orders.push(t[i].row_perm);
+    }
+    let delta = [];
+    let res = "\\\\Delta";
+    for (var i = 0; i < opt_orders.length; i++) {
+        let dist = Math.min(
+                minLinks(opt_orders[i],simul_orders[i]).length,
+                minLinks(inversed(opt_orders[i]),simul_orders[i]).length
+        )
+        delta.push(dist);
+        res += "\n" + dist;
+    }
+    console.log(res);
+    
+    let mi_diff = [];
+    for (var i = 0; i < t.length; i++) {
+        let opt_permuted = reorder.permute_matrix(t[i].matrix,opt_orders[i]);
+        let simul_permuted = reorder.permute_matrix(t[i].matrix,simul_orders[i]);
+        mi_diff.push(reorder.morans_i(opt_permuted) - reorder.morans_i(simul_permuted));
+    }
+    console.log("Move diff");
+    console.log(delta);
+    console.log("Mi diff");
+    console.log(mi_diff);
+    
+    
+}
+
+function gradual_improve(t,ls,str){
+//    let timesteps = [75,31,70,2,49,35,44,86];
+    let timesteps = [1,5,7,8,11,12,15];
+//    let timesteps = [0,1,2,3,4,5];
+    console.log("Starting");
+    let simul_order = simul_get_order(t);
+    console.log("Simul order computed");
+//    let changes = [
+//        [2,1],
+//        [3,1],
+//        [2,2],
+//        [3,2],
+//        [4,2]
+//    ];
+    
+    let changes = [
+        [2,2],
+        [2,4],
+        [2,6],
+        [2,8],
+        [2,10]
+    ];
+    changes = [];
+//    let changes = [
+//        [2,4],
+//        [2,8],
+//        [2,12],
+//        [2,16],
+//        [2,20]
+//    ];
+    
+    
+    let all_values = [];
+    console.log(timesteps.length);
+    
+    
+    
+//    let stable_orderings = all_intervals(t,ls,str,2,1);
+//    let stable_orderings1 = all_intervals(t,ls,str,2,2);
+//    let stable_orderings2 = all_intervals(t,ls,str,2,4);
+    
+    for (let i = 0; i < timesteps.length; i++) {
+        console.log("Timestep: " + timesteps[i]);
+        
+        let simul_permuted = reorder.permute_matrix(t[timesteps[i]].matrix,simul_order);
+        let simul_moran = reorder.morans_i(simul_permuted);
+        
+        
+        let mis = [simul_moran];
+        
+        let opt = lo_get_order(t,timesteps[i]);
+        let opt_permuted = reorder.permute_matrix(t[timesteps[i]].matrix,opt);
+        let opt_moran = reorder.morans_i(opt_permuted);
+        
+        let deltas = [0];
+        
+        
+        for (let c = 0; c < changes.length; c++) {
+            console.log("Changes: " + changes[c]);
+            let order = improve_from_simul(t,timesteps[i],changes[c][0],changes[c][1]);
+            let permuted = reorder.permute_matrix(t[timesteps[i]].matrix,order);
+            mis.push(reorder.morans_i(permuted));
+            deltas.push(changes[c][0]*changes[c][1]);
+            
+        }
+        
+        let weights = [t.length/16,t.length/8,t.length/4,t.length/2,t.length];
+//        let weights = [2,t.length/2,t.length];
+        
+        for (let j = 0; j < weights.length; j++) {
+            let w = 1 + weights[j];
+            let w_sim = weighted_simul(t,timesteps[i],w);
+            deltas.push(minLinks(simul_order,w_sim).length);
+            mis.push(reorder.morans_i(reorder.permute_matrix(t[timesteps[i]].matrix,w_sim)));
+        }
+        
+//        deltas.push(minLinks(simul_order,stable_orderings[timesteps[i]]).length);
+//        deltas.push(minLinks(simul_order,stable_orderings1[timesteps[i]]).length);
+//        deltas.push(minLinks(simul_order,stable_orderings2[timesteps[i]]).length);
+//        mis.push(reorder.morans_i(reorder.permute_matrix(t[timesteps[i]].matrix,stable_orderings[timesteps[i]])));
+//        mis.push(reorder.morans_i(reorder.permute_matrix(t[timesteps[i]].matrix,stable_orderings1[timesteps[i]])));
+//        mis.push(reorder.morans_i(reorder.permute_matrix(t[timesteps[i]].matrix,stable_orderings2[timesteps[i]])));
+        
+        deltas.push(minLinks(simul_order,opt).length);
+        mis.push(opt_moran);
+        
+        let csv = "";
+        
+        for (let j = 0; j < deltas.length; j++) {
+            csv += deltas[j] + "," + mis[j] + "\n";
+        }
+        
+        console.log(csv);
+        
+        
+    }
+    
+    
+    
+    
+}
+
+
+  function weight_dist(matrices, distances,timestep,weight) {
+    const n = matrices.length;
+
+    const res = [];
+    for (let i = 0; i < matrices[0].length; i++) {
+      const newrow = [];
+      for (let j = 0; j < matrices[0][0].length; j++) {
+        newrow.push(0);
+      }
+      res.push(newrow);
+    }
+    for (let k = 0; k < n; k++) {
+      let distance = distances[k];
+      let distMatrix = [];
+      const vector = matrices[k];
+      const n1 = vector.length;
+      for (let i = 0; i < n1; i++) {
+        const d = [];
+        distMatrix[i] = d;
+        for (let j = 0; j < n1; j++) {
+          if (j < i) {
+            d[j] = distMatrix[j][i];
+          } else if (i === j) {
+            d[j] = 0;
+          } else {
+            d[j] = distance(vector[i], vector[j]);
+          }
+        }
+      }
+      for (let i = 0; i < distMatrix.length; i++) {
+        for (let j = 0; j < distMatrix[0].length; j++) {
+          let f = 1;
+          if(k === timestep){
+              f = weight;
+          }
+          res[i][j] += f * distMatrix[i][j];
+        }
+      }
+    }
+    return res;
+  }
+
+function weighted_simul(t,timestep,weight){
+    
+    let distances = [];
+    let matrices = [];
+    for (let i = 0; i < t.length; i++) {
+        distances.push(getDistance(t[i].matrix));
+        matrices.push(t[i].matrix);
+    }
+    let dist_rows = weight_dist(matrices,distances,timestep,weight);
+    let order = reorder.optimal_leaf_order();
+    let row_perm = order.distanceMatrix(dist_rows)(matrices[0]);
+    return row_perm;
+}
+
+function improve_from_simul(t,timestep,moves,nr_intervals){
+    let simul_order = simul_get_order(t);
+
+    let interval_length = Math.round(simul_order.length / nr_intervals);
+
+    let best_permutation = [];
+    let best_inversion = [];
+    let order = simul_order;
+    for (var i = 0; i < order.length / interval_length; i++) {
+        let intervals = [];
+        for (let u = i*interval_length; u < Math.min(i*interval_length + interval_length,order.length); u++) {
+            for (let v = u; v < Math.min(i*interval_length + interval_length,order.length); v++) {
+                intervals.push([u,v]);
+            }
+        }
+        
+        let res = choose_k_intervals([],0,moves, intervals, (x)=>reshuffle_intervals(timestep, x, order, false, [], moves));
+        best_permutation = res[1];
+        best_inversion = res[2];
+        order = create_order(order,best_permutation,best_inversion);
+    }
+    return order;
+}
+
+function inversed(order){
+    let inv = [];
+    for (var i = 0; i < order.length; i++) {
+        inv[i] = order[order.length-1-i];
+    }
+    return inv;
 }
 
 function run_fast_experiments(t,ls,str){
@@ -73,7 +348,7 @@ function run_fast_experiments(t,ls,str){
     console.log(res3);
 }
 
-const nr_moves = 4;
+const nr_moves = 2;
 
 function stepwise_improvement(t,str){
     // Leaf order on the first matrix
@@ -215,7 +490,7 @@ function check_proper_order(n,order){
     }
 }
 
-function all_intervals(t,ls,str){
+function all_intervals2(t,ls,str){
     console.log("All intervals");
     let start = new Date().getTime();
     let firstorder = lo_get_order(t,0);
@@ -255,13 +530,123 @@ function all_intervals(t,ls,str){
     return computeQualities(t,str,time);
 }
 
+
+
+function all_intervals(t,ls,str,moves,nr_intervals){
+//    console.log("2 Per sqrt n All intervals");
+    
+    let start = new Date().getTime();
+    let firstorder = lo_get_order(t,0);
+    let orders = [firstorder];
+    
+    let interval_length = Math.round(firstorder.length / nr_intervals);
+    
+    for (let timestep = 1; timestep < t.length; timestep++) {
+//        console.log("Doing " + timestep);
+        let order = orders[timestep-1];
+        
+        let best_permutation = [];
+        let best_inversion = [];
+        let best_order = order;
+        for (var i = 0; i < order.length / interval_length; i++) {
+//            console.log("Set " + i)
+            let intervals = [];
+            for (let u = i*interval_length; u < Math.min(i*interval_length + interval_length,order.length); u++) {
+                for (let v = u; v < Math.min(i*interval_length + interval_length,order.length); v++) {
+                    intervals.push([u,v]);
+                }
+            }
+            
+            let res = choose_k_intervals([],0,moves, intervals, (x)=>reshuffle_intervals(timestep, x, best_order, false, [], moves));
+            best_permutation = res[1];
+            best_inversion = res[2];
+            best_order = create_order(best_order,best_permutation,best_inversion);
+        }
+        
+        
+//        console.log("Time: " + (new Date().getTime() - start));
+
+
+        orders.push(best_order);
+    }
+    return orders;
+    let end = new Date().getTime();
+    let time = end - start;
+    console.log("Time: " + time);
+    link_transitions = [];
+    for (let i = 0; i < t.length; i++) {
+        t[i].order(orders[i], orders[i]);
+        if(i > 0){
+            ls[i-1].update_links(minLinks(orders[i-1],orders[i]));
+            link_transitions.push(minLinks(orders[i-1],orders[i]));
+//            if(minLinks(orders[i-1],orders[i]).length > nr_moves){
+//                debugger;
+//            }
+        }
+    }
+    console.log(computeQualities(t,str,time));
+    return computeQualities(t,str,time);
+}
+
 function near_simultaneous_all_intervals(t,ls,str){
     console.log("All intervals NS")
     let start = new Date().getTime();
     let simul_order = simul_get_order(t);
     let orders = [];
     let order = [...simul_order];
+    
+    let interval_length = Math.floor(Math.sqrt(order.length));
+    interval_length = 15;
+    
+//    console.log(intervals.length + " intervals");
+    for (let timestep = 0; timestep < t.length; timestep++) {
+        console.log("Doing " + timestep);
+        if(timestep > 0){
+            order = orders[timestep-1];
+        }
+        let best_permutation = [];
+        let best_inversion = [];
+        let best_order = order;
+        for (var i = 0; i < order.length / interval_length; i++) {
+            console.log("Set " + i)
+            let intervals = [];
+            for (let u = i*interval_length; u < Math.min(i*interval_length + interval_length,order.length); u++) {
+                for (let v = u; v < Math.min(i*interval_length + interval_length,order.length); v++) {
+                    intervals.push([u,v]);
+                }
+            }
+            let res = choose_k_intervals([],0,nr_moves, intervals, (x)=>reshuffle_intervals(timestep, x, order, false, simul_order, nr_moves));
+            best_permutation = res[1];
+            best_inversion = res[2];
+            best_order = create_order(best_order,best_permutation,best_inversion);
+        }
+        orders.push(best_order);
+    }
+    let end = new Date().getTime();
+    let time = end - start;
+    console.log("Time: " + time);
+    link_transitions = [];
+    for (let i = 0; i < t.length; i++) {
+        t[i].order(orders[i], orders[i]);
+        if(i > 0){
+            ls[i-1].update_links(minLinks(orders[i-1],orders[i]));
+            link_transitions.push(minLinks(orders[i-1],orders[i]));
+//            if(minLinks(orders[i-1],orders[i]).length > nr_moves){
+//                debugger;
+//            }
+        }
+    }
+    return computeQualities(t,str,time);
+}
+
+function near_simultaneous_all_intervals2(t,ls,str){
+    console.log("All intervals NS")
+    let start = new Date().getTime();
+    let simul_order = simul_get_order(t);
+    let orders = [];
+    let order = [...simul_order];
     let intervals = [];
+    
     for (let i = 0; i < order.length; i++) {
         for (let j = i; j < order.length; j++) {
             intervals.push([i,j]);
@@ -278,7 +663,7 @@ function near_simultaneous_all_intervals(t,ls,str){
         let res = choose_k_intervals([],0,nr_moves, intervals, (x)=>reshuffle_intervals(timestep, x, order, true, simul_order, nr_moves));
         best_permutation = res[1];
         best_inversion = res[2];
-        let bestorder = create_order(order,best_permutation,best_inversion);
+        let bestorder = create_order(bestorder,best_permutation,best_inversion);
         orders.push(bestorder);
     }
     let end = new Date().getTime();
@@ -2204,8 +2589,10 @@ function lo_get_order(t,timestep) {
 
 function simul_get_order(t) {
     let distances = [];
+    let matrices = []
     for (let i = 0; i < t.length; i++) {
-        distances.push(getDistance(matrices[i]));
+        distances.push(getDistance(t[i].matrix));
+        matrices.push(t[i].matrix);
     }
     let dist_rows = reorder.mult_dist()(matrices,distances);
     let order = reorder.optimal_leaf_order();
