@@ -92,15 +92,14 @@ function run_experiments(t,ls,str){
 
 
 function get_delta_moves(t,ls,str){
-    let unstable = optimal_unstable(t,ls,str);
     let opt_orders = [];
     for (var i = 0; i < t.length; i++) {
-        opt_orders.push(t[i].row_perm);
+        opt_orders.push(lo_get_order(t,i));
     }
-    let simul = simultaneous_leaf_order_permute(t);
+    let simul = simul_get_order(t);
     let simul_orders = [];
     for (var i = 0; i < t.length; i++) {
-        simul_orders.push(t[i].row_perm);
+        simul_orders.push(simul);
     }
     let delta = [];
     let res = "\\\\Delta";
@@ -128,10 +127,30 @@ function get_delta_moves(t,ls,str){
     
 }
 
+function print_matrices_with_orders(permuteds){
+    
+    var res = "";
+    for (var m = 0; m < permuteds.length; m++) {
+        let permuted = permuteds[m][0];
+        let order = permuteds[m][1];
+        for (var j = 0; j < order.length; j++) {
+                res += "\t" + order[j];
+        }
+        for (var i = 0; i < order.length; i++) {
+            res += "\n " + order[i];
+            for (var j = 0; j < permuted.length; j++) {
+                res += "\t" + permuted[i][j];
+            }
+        }
+        res += "\n";
+    }
+    return res;
+}
+
 function gradual_improve(t,ls,str){
-//    let timesteps = [75,31,70,2,49,35,44,86];
-    let timesteps = [1,5,7,8,11,12,15];
-//    let timesteps = [0,1,2,3,4,5];
+//    let timesteps = [2,31,35,44,49,70,75,86];
+//    let timesteps = [1,5,7,8,11,12,15];
+    let timesteps = [0,1,2,3,4,5];
     console.log("Starting");
     let simul_order = simul_get_order(t);
     console.log("Simul order computed");
@@ -142,35 +161,46 @@ function gradual_improve(t,ls,str){
 //        [3,2],
 //        [4,2]
 //    ];
-    
-    let changes = [
-        [2,2],
-        [2,4],
-        [2,6],
-        [2,8],
-        [2,10]
-    ];
-    changes = [];
+//    
 //    let changes = [
+//        [2,2],
 //        [2,4],
+//        [2,6],
 //        [2,8],
-//        [2,12],
-//        [2,16],
-//        [2,20]
+//        [2,10]
 //    ];
+//    changes = [];
+    let changes = [
+        [2,4],
+        [2,8],
+        [2,12],
+        [2,16],
+        [2,20]
+    ];
     
     
     let all_values = [];
     console.log(timesteps.length);
     
     
-    
+    let mi_gain_sum = 0;
+    let move_gain_sum = 0;
 //    let stable_orderings = all_intervals(t,ls,str,2,1);
 //    let stable_orderings1 = all_intervals(t,ls,str,2,2);
 //    let stable_orderings2 = all_intervals(t,ls,str,2,4);
     
+    let individual_ordered = [];
+    let close_to_ind_ordered = [];
+    let close_to_sim_ordered = [];
+    let simultaneous_ordered = [];
+    
+    let sim_ind_mi = [];
+    
     for (let i = 0; i < timesteps.length; i++) {
         console.log("Timestep: " + timesteps[i]);
+        
+        let permuted_matrices = []
+        let all_orders = []
         
         let simul_permuted = reorder.permute_matrix(t[timesteps[i]].matrix,simul_order);
         let simul_moran = reorder.morans_i(simul_permuted);
@@ -184,13 +214,23 @@ function gradual_improve(t,ls,str){
         
         let deltas = [0];
         
+        let avg_mis = [];
+        avg_mis.push(get_avg_mi(simul_order,t));
+        
+        permuted_matrices.push(simul_permuted);
+        all_orders.push(simul_order);
+        
+        sim_ind_mi.push([simul_moran,opt_moran]);
         
         for (let c = 0; c < changes.length; c++) {
             console.log("Changes: " + changes[c]);
             let order = improve_from_simul(t,timesteps[i],changes[c][0],changes[c][1]);
             let permuted = reorder.permute_matrix(t[timesteps[i]].matrix,order);
+            permuted_matrices.push(permuted);
+            all_orders.push(order);
             mis.push(reorder.morans_i(permuted));
             deltas.push(changes[c][0]*changes[c][1]);
+            avg_mis.push(get_avg_mi(order,t));
             
         }
         
@@ -200,8 +240,12 @@ function gradual_improve(t,ls,str){
         for (let j = 0; j < weights.length; j++) {
             let w = 1 + weights[j];
             let w_sim = weighted_simul(t,timesteps[i],w);
+            let permuted = reorder.permute_matrix(t[timesteps[i]].matrix,w_sim);
             deltas.push(minLinks(simul_order,w_sim).length);
-            mis.push(reorder.morans_i(reorder.permute_matrix(t[timesteps[i]].matrix,w_sim)));
+            mis.push(reorder.morans_i(permuted));
+            permuted_matrices.push(permuted);
+            all_orders.push(w_sim);
+            avg_mis.push(get_avg_mi(w_sim,t));
         }
         
 //        deltas.push(minLinks(simul_order,stable_orderings[timesteps[i]]).length);
@@ -211,25 +255,120 @@ function gradual_improve(t,ls,str){
 //        mis.push(reorder.morans_i(reorder.permute_matrix(t[timesteps[i]].matrix,stable_orderings1[timesteps[i]])));
 //        mis.push(reorder.morans_i(reorder.permute_matrix(t[timesteps[i]].matrix,stable_orderings2[timesteps[i]])));
         
-        deltas.push(minLinks(simul_order,opt).length);
+        deltas.push(Math.min(
+                minLinks(opt,simul_order).length,
+                minLinks(inversed(opt),simul_order).length
+        ));
         mis.push(opt_moran);
+        avg_mis.push(get_avg_mi(opt,t));
+        permuted_matrices.push(opt_permuted);
+        all_orders.push(opt);
         
         let csv = "";
         
         for (let j = 0; j < deltas.length; j++) {
-            csv += deltas[j] + "," + mis[j] + "\n";
+            csv += deltas[j] + "," + mis[j] + "," +avg_mis[j] + "\n";
         }
+        
+        // Statistics and printing.
+        individual_ordered.push([opt_permuted,opt]);
+        close_to_ind_ordered.push(opt_permuted);
+        close_to_sim_ordered.push(simul_permuted);
+        simultaneous_ordered.push([simul_permuted,simul_order]);
+        
+        let mi_diff = mis[mis.length-1] - mis[0];
+        
+        let found_close2opt = false;
+        
+        let best_mi_gain = 0;
+        let best_move_gain = Infinity;
+        for (var j = 0; j < permuted_matrices.length; j++) {
+            if(deltas[j] <= Math.round(deltas[deltas.length-1] * 0.1)){
+                if(mis[j] > best_mi_gain){
+                    best_mi_gain = mis[j];
+                    close_to_sim_ordered[close_to_sim_ordered.length-1] = [permuted_matrices[j],all_orders[j]];
+                }
+            }
+            if(mis[j] > mis[mis.length-1] - mi_diff * 0.1){
+                if(deltas[j] < best_move_gain){
+                    best_move_gain = deltas[j];
+                    close_to_ind_ordered[close_to_ind_ordered.length-1] = [permuted_matrices[j],all_orders[j]];
+                    if(j < deltas.length-1){found_close2opt = true;}
+                }
+            }
+        }
+        
+        // Now we have 4 thingies
+        // Now do stats
+//        console.log("MI GAIN");
+//        console.log((best_mi_gain - mis[0]) / mi_diff);
+//        console.log("MOVe Gain");
+//        console.log(1 - (best_move_gain / deltas[deltas.length-1]));
+        console.log("Debug")
+        
+        if(!found_close2opt){
+            console.log("Using special")
+            close_to_ind_ordered[close_to_ind_ordered.length-1] = [permuted_matrices[permuted_matrices.length-2],all_orders[all_orders.length-2]];
+        }
+        
+        mi_gain_sum += (best_mi_gain - mis[0]) / mi_diff;
+        move_gain_sum += 1 - (best_move_gain / deltas[deltas.length-1]);
         
         console.log(csv);
         
         
     }
     
+    let ind_dists = [];
+    let close_ind_dists = [];
+    let close_sim_dists = [];
+    
+    let close_sim_mi_diff = [];
+    let close_ind_mi_diff = [];
     
     
+    for (var i = 0; i < timesteps.length; i++) {
+        ind_dists.push(minLinks(simul_order,individual_ordered[i][1]).length);
+        close_ind_dists.push(minLinks(simul_order,close_to_ind_ordered[i][1]).length);
+        close_sim_dists.push(minLinks(simul_order,close_to_sim_ordered[i][1]).length);
+        
+        close_ind_mi_diff.push((sim_ind_mi[i][1] - reorder.morans_i(close_to_ind_ordered[i][0])) / (sim_ind_mi[i][1] - sim_ind_mi[i][0]));
+        close_sim_mi_diff.push((sim_ind_mi[i][1] - reorder.morans_i(close_to_sim_ordered[i][0])) / (sim_ind_mi[i][1] - sim_ind_mi[i][0]));
+        
+    }
     
+    // Print stats
+    if(false){
+        console.log("MI gain within first 10% of moves:");
+        console.log(mi_gain_sum / timesteps.length);
+        console.log("Move gain within first 10% of mi diff:");
+        console.log(move_gain_sum / timesteps.length);
+        // Print matrices
+        console.log("Individiual matrices: ");
+        console.log(print_matrices_with_orders(individual_ordered));
+        console.log("Close to individual matrices: ");
+        console.log(print_matrices_with_orders(close_to_ind_ordered));
+        console.log("Close to simul matrices: ");
+        console.log(print_matrices_with_orders(close_to_sim_ordered));
+        console.log("Simul matrices: ");
+        console.log(print_matrices_with_orders(simultaneous_ordered));
+        console.log("Distances")
+        console.log(ind_dists);
+        console.log(close_ind_dists);
+        console.log(close_sim_dists);
+        console.log("Mi Percentages");
+        console.log(close_ind_mi_diff);
+        console.log(close_sim_mi_diff);
+    }
 }
 
+function get_avg_mi(order,t){
+    var sum = 0;
+    for (var i = 0; i < t.length; i++) {
+        sum += reorder.morans_i(reorder.permute_matrix(t[i].matrix,order));
+    }
+    return sum / t.length;
+}
 
   function weight_dist(matrices, distances,timestep,weight) {
     const n = matrices.length;
