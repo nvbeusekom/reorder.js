@@ -84,6 +84,7 @@ line {
         </div>
         <div style="margin-top:4px;margin-bottom: 4px">
         <button type="button" onclick="print_all(tables)">Print matrices to console</button>
+        <button type="button" onclick="print_x(tables)">Print matrix X to console</button>
         <button type="button" onclick="print_links(linksets)">Print links to console</button>
         <button type="button" onclick="generate_data(tables)">Generate Data on console</button>
         <div style="margin-top:4px;margin-bottom: 4px">
@@ -388,6 +389,10 @@ function print_all(tables){
     }
     console.log(output);
     return output;
+}
+
+function print_x(tables){
+    console.log(tables[getTimestep()].print());
 }
 
 
